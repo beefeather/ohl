@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="Java Development Tools Core" version="1.1">
+    <plugin id="org.eclipse.jdt.core"/>
+    <package name="org.eclipse.jdt.core">
+        <type extend="false" instantiate="false" name="BufferChangedEvent"/>
+        <type instantiate="false" name="CompletionContext"/>
+        <type instantiate="false" name="CompletionProposal"/>
+        <type extend="false" name="CorrectionEngine"/>
+        <type extend="false" instantiate="false" name="ElementChangedEvent"/>
+        <type instantiate="false" name="Flags"/>
+        <type implement="false" name="IClassFile"/>
+        <type implement="false" name="IClasspathAttribute"/>
+        <type implement="false" name="IClasspathEntry"/>
+        <type implement="false" name="ICodeAssist"/>
+        <type implement="false" name="ICompilationUnit"/>
+        <type implement="false" name="IField"/>
+        <type implement="false" name="IImportContainer"/>
+        <type implement="false" name="IImportDeclaration"/>
+        <type implement="false" name="IInitializer"/>
+        <type implement="false" name="IJavaElement"/>
+        <type implement="false" name="IJavaElementDelta"/>
+        <type implement="false" name="IJavaModel"/>
+        <type implement="false" name="IJavaModelMarker"/>
+        <type implement="false" name="IJavaModelStatus"/>
+        <type implement="false" name="IJavaModelStatusConstants"/>
+        <type implement="false" name="IJavaProject"/>
+        <type implement="false" name="ILocalVariable"/>
+        <type implement="false" name="IMember"/>
+        <type implement="false" name="IMethod"/>
+        <type implement="false" name="IOpenable"/>
+        <type implement="false" name="IPackageDeclaration"/>
+        <type implement="false" name="IPackageFragment"/>
+        <type implement="false" name="IPackageFragmentRoot"/>
+        <type implement="false" name="IParent"/>
+        <type implement="false" name="IRegion"/>
+        <type implement="false" name="ISourceManipulation"/>
+        <type implement="false" name="ISourceRange"/>
+        <type implement="false" name="ISourceReference"/>
+        <type implement="false" name="IType"/>
+        <type implement="false" name="ITypeHierarchy"/>
+        <type implement="false" name="ITypeParameter"/>
+        <type implement="false" name="IWorkingCopy"/>
+        <type instantiate="false" name="JavaConventions"/>
+        <type instantiate="false" name="JavaCore"/>
+        <type extend="false" name="JavaModelException"/>
+        <type instantiate="false" name="NamingConventions"/>
+        <type instantiate="false" name="Signature"/>
+        <type extend="false" instantiate="false" name="ToolFactory"/>
+    </package>
+    <package name="org.eclipse.jdt.core.compiler">
+        <type extend="false" instantiate="false" name="BuildContext"/>
+        <type instantiate="false" name="CharOperation"/>
+        <type implement="false" name="IProblem"/>
+        <type implement="false" name="IScanner"/>
+        <type implement="false" name="ITerminalSymbols"/>
+        <type extend="false" instantiate="false" name="InvalidInputException"/>
+        <type extend="false" instantiate="false" name="ReconcileContext"/>
+    </package>
+    <package name="org.eclipse.jdt.core.compiler.batch">
+        <type instantiate="false" name="BatchCompiler"/>
+    </package>
+    <package name="org.eclipse.jdt.core.dom">
+        <type instantiate="false" name="AST">
+            <method reference="false" signature="(ILorg.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;Ljava.util.Map;ZLorg.eclipse.jdt.internal.core.CompilationUnit;ILorg.eclipse.core.runtime.IProgressMonitor;)Lorg.eclipse.jdt.core.dom.CompilationUnit;" name="convertCompilationUnit"/>
+            <method reference="false" signature="(ILorg.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;[CLjava.util.Map;ZLorg.eclipse.jdt.internal.core.CompilationUnit;ILorg.eclipse.core.runtime.IProgressMonitor;)Lorg.eclipse.jdt.core.dom.CompilationUnit;" name="convertCompilationUnit"/>
+        </type>
+        <type extend="false" name="ASTNode"/>
+        <type instantiate="false" name="ASTParser"/>
+        <type name="ASTRecoveryPropagator">
+            <method reference="false" signature="([Lorg.eclipse.jdt.core.compiler.CategorizedProblem;Lorg.eclipse.jdt.internal.compiler.parser.RecoveryScannerData;)V" name="&lt;init&gt;"/>
+        </type>
+        <type instantiate="false" name="AnnotationTypeDeclaration"/>
+        <type instantiate="false" name="AnnotationTypeMemberDeclaration"/>
+        <type instantiate="false" name="AnonymousClassDeclaration"/>
+        <type instantiate="false" name="ArrayAccess"/>
+        <type instantiate="false" name="ArrayCreation"/>
+        <type instantiate="false" name="ArrayInitializer"/>
+        <type instantiate="false" name="ArrayType"/>
+        <type instantiate="false" name="AssertStatement"/>
+        <type instantiate="false" name="Assignment"/>
+        <type instantiate="false" name="Block"/>
+        <type instantiate="false" name="BlockComment"/>
+        <type instantiate="false" name="BooleanLiteral"/>
+        <type instantiate="false" name="BreakStatement"/>
+        <type instantiate="false" name="CastExpression"/>
+        <type instantiate="false" name="CatchClause"/>
+        <type instantiate="false" name="CharacterLiteral"/>
+        <type instantiate="false" name="ChildListPropertyDescriptor"/>
+        <type instantiate="false" name="ChildPropertyDescriptor"/>
+        <type instantiate="false" name="ClassInstanceCreation"/>
+        <type instantiate="false" name="CompilationUnit"/>
+        <type instantiate="false" name="ConditionalExpression"/>
+        <type instantiate="false" name="ConstructorInvocation"/>
+        <type instantiate="false" name="ContinueStatement"/>
+        <type instantiate="false" name="DoStatement"/>
+        <type instantiate="false" name="EmptyStatement"/>
+        <type instantiate="false" name="EnhancedForStatement"/>
+        <type instantiate="false" name="EnumConstantDeclaration"/>
+        <type instantiate="false" name="EnumDeclaration"/>
+        <type instantiate="false" name="ExpressionStatement"/>
+        <type instantiate="false" name="FieldAccess"/>
+        <type instantiate="false" name="FieldDeclaration"/>
+        <type instantiate="false" name="ForStatement"/>
+        <type implement="false" name="IAnnotationBinding"/>
+        <type implement="false" name="IBinding"/>
+        <type implement="false" name="IMemberValuePairBinding"/>
+        <type implement="false" name="IMethodBinding"/>
+        <type implement="false" name="IPackageBinding"/>
+        <type implement="false" name="ITypeBinding"/>
+        <type implement="false" name="IVariableBinding"/>
+        <type instantiate="false" name="IfStatement"/>
+        <type instantiate="false" name="ImportDeclaration"/>
+        <type instantiate="false" name="InfixExpression"/>
+        <type instantiate="false" name="Initializer"/>
+        <type instantiate="false" name="InstanceofExpression"/>
+        <type instantiate="false" name="Javadoc"/>
+        <type instantiate="false" name="LabeledStatement"/>
+        <type instantiate="false" name="LineComment"/>
+        <type instantiate="false" name="MarkerAnnotation"/>
+        <type instantiate="false" name="MemberRef"/>
+        <type instantiate="false" name="MemberValuePair"/>
+        <type instantiate="false" name="MethodDeclaration"/>
+        <type instantiate="false" name="MethodInvocation"/>
+        <type instantiate="false" name="MethodRef"/>
+        <type instantiate="false" name="MethodRefParameter"/>
+        <type instantiate="false" name="Modifier"/>
+        <type extend="false" name="Name"/>
+        <type instantiate="false" name="NormalAnnotation"/>
+        <type instantiate="false" name="NullLiteral"/>
+        <type instantiate="false" name="NumberLiteral"/>
+        <type instantiate="false" name="PackageDeclaration"/>
+        <type instantiate="false" name="ParameterizedType"/>
+        <type instantiate="false" name="ParenthesizedExpression"/>
+        <type instantiate="false" name="PostfixExpression"/>
+        <type instantiate="false" name="PrefixExpression"/>
+        <type instantiate="false" name="PrimitiveType"/>
+        <type instantiate="false" name="QualifiedName"/>
+        <type instantiate="false" name="QualifiedType"/>
+        <type instantiate="false" name="ReturnStatement"/>
+        <type instantiate="false" name="SimpleName"/>
+        <type instantiate="false" name="SimplePropertyDescriptor"/>
+        <type instantiate="false" name="SimpleType"/>
+        <type instantiate="false" name="SingleMemberAnnotation"/>
+        <type instantiate="false" name="SingleVariableDeclaration"/>
+        <type instantiate="false" name="StringLiteral"/>
+        <type extend="false" name="StructuralPropertyDescriptor"/>
+        <type instantiate="false" name="SuperConstructorInvocation"/>
+        <type instantiate="false" name="SuperFieldAccess"/>
+        <type instantiate="false" name="SuperMethodInvocation"/>
+        <type instantiate="false" name="SwitchCase"/>
+        <type instantiate="false" name="SwitchStatement"/>
+        <type instantiate="false" name="SynchronizedStatement"/>
+        <type instantiate="false" name="TagElement"/>
+        <type instantiate="false" name="TextElement"/>
+        <type instantiate="false" name="ThisExpression"/>
+        <type instantiate="false" name="ThrowStatement"/>
+        <type instantiate="false" name="TryStatement"/>
+        <type instantiate="false" name="TypeDeclaration"/>
+        <type instantiate="false" name="TypeDeclarationStatement"/>
+        <type instantiate="false" name="TypeLiteral"/>
+        <type instantiate="false" name="TypeParameter"/>
+        <type instantiate="false" name="VariableDeclarationExpression"/>
+        <type instantiate="false" name="VariableDeclarationFragment"/>
+        <type instantiate="false" name="VariableDeclarationStatement"/>
+        <type instantiate="false" name="WhileStatement"/>
+        <type instantiate="false" name="WildcardType"/>
+    </package>
+    <package name="org.eclipse.jdt.core.dom.rewrite">
+        <type extend="false" instantiate="false" name="ASTRewrite"/>
+        <type implement="false" name="ITrackedNodePosition"/>
+    </package>
+    <package name="org.eclipse.jdt.core.eval">
+        <type implement="false" name="IEvaluationContext"/>
+        <type implement="false" name="IGlobalVariable"/>
+    </package>
+    <package name="org.eclipse.jdt.core.formatter">
+        <type extend="false" name="CodeFormatter"/>
+        <type extend="false" instantiate="false" name="CodeFormatterApplication"/>
+        <type extend="false" instantiate="false" name="DefaultCodeFormatterConstants"/>
+        <type instantiate="false" name="IndentManipulation"/>
+    </package>
+    <package name="org.eclipse.jdt.core.jdom">
+        <type extend="false" name="DOMFactory"/>
+        <type implement="false" name="IDOMCompilationUnit"/>
+        <type implement="false" name="IDOMFactory"/>
+        <type implement="false" name="IDOMField"/>
+        <type implement="false" name="IDOMImport"/>
+        <type implement="false" name="IDOMInitializer"/>
+        <type implement="false" name="IDOMMember"/>
+        <type implement="false" name="IDOMMethod"/>
+        <type implement="false" name="IDOMNode"/>
+        <type implement="false" name="IDOMPackage"/>
+        <type implement="false" name="IDOMType"/>
+    </package>
+    <package name="org.eclipse.jdt.core.search">
+        <type implement="false" name="IJavaSearchConstants"/>
+        <type extend="false" name="SearchEngine"/>
+    </package>
+    <package name="org.eclipse.jdt.core.util">
+        <type instantiate="false" name="CompilationUnitSorter"/>
+        <type implement="false" name="IAttributeNamesConstants"/>
+        <type implement="false" name="IBytecodeVisitor"/>
+        <type implement="false" name="IConstantPoolConstant"/>
+        <type implement="false" name="IModifierConstants"/>
+        <type implement="false" name="IOpcodeMnemonics"/>
+        <type extend="false" instantiate="false" name="OpcodeStringValues"/>
+    </package>
+</component>
