@@ -29,6 +29,16 @@ public class CaseStatement extends Statement {
 	public Expression constantExpression;
 	public CaseLabel targetLabel;
 	
+	// OHL
+	public boolean ohlIsOhlCase;
+	// need type here
+	// need expression here
+	public CastExpression ohlTodoCastExpression;
+	// need type here
+	public LocalDeclaration ohlTodoTempVarDeclaration;
+	public char [] ohlSelector;
+	public Argument [] ohlArgumentProto;
+	
 public CaseStatement(Expression constantExpression, int sourceEnd, int sourceStart) {
 	this.constantExpression = constantExpression;
 	this.sourceEnd = sourceEnd;

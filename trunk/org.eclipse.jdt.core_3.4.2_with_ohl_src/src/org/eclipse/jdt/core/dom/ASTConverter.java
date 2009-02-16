@@ -195,7 +195,7 @@ class ASTConverter {
 	
 	protected void buildBodyDeclarations(org.eclipse.jdt.internal.compiler.ast.TypeDeclaration enumDeclaration2, EnumDeclaration enumDeclaration) {
 		// add body declaration in the lexical order
-		org.eclipse.jdt.internal.compiler.ast.TypeDeclaration[] members = enumDeclaration2.memberTypes;
+ 		org.eclipse.jdt.internal.compiler.ast.TypeDeclaration[] members = enumDeclaration2.memberTypes;
 		org.eclipse.jdt.internal.compiler.ast.FieldDeclaration[] fields = enumDeclaration2.fields;
 		org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration[] methods = enumDeclaration2.methods;
 		
@@ -2308,7 +2308,10 @@ class ASTConverter {
 			classInstanceCreation.setSourceRange(declarationSourceStart, allocation.anonymousType.bodyEnd - declarationSourceStart + 1);
 			final AnonymousClassDeclaration anonymousClassDeclaration = new AnonymousClassDeclaration(this.ast);
 			int start = retrieveStartBlockPosition(allocation.anonymousType.sourceEnd, allocation.anonymousType.bodyEnd);
-			anonymousClassDeclaration.setSourceRange(start, allocation.anonymousType.bodyEnd - start + 1);
+			// OHL
+			if (start != -1) {
+			  anonymousClassDeclaration.setSourceRange(start, allocation.anonymousType.bodyEnd - start + 1);
+			}
 			classInstanceCreation.setAnonymousClassDeclaration(anonymousClassDeclaration);
 			buildBodyDeclarations(allocation.anonymousType, anonymousClassDeclaration);
 			if (this.resolveBindings) {
@@ -2624,6 +2627,12 @@ class ASTConverter {
 	public ASTNode convert(org.eclipse.jdt.internal.compiler.ast.TypeDeclaration typeDeclaration) {
 		int kind = org.eclipse.jdt.internal.compiler.ast.TypeDeclaration.kind(typeDeclaration.modifiers);
 		switch (kind) {
+			case org.eclipse.jdt.internal.compiler.ast.TypeDeclaration.OHL_ENUM_CASE_DECL :
+				if (this.ast.apiLevel == AST.JLS2_INTERNAL) {
+					return null;
+				} else {
+					return convertToOhlEnumCaseDeclaration(typeDeclaration);
+				}
 			case org.eclipse.jdt.internal.compiler.ast.TypeDeclaration.ENUM_DECL :
 				if (this.ast.apiLevel == AST.JLS2_INTERNAL) {
 					return null;
@@ -2892,6 +2901,31 @@ class ASTConverter {
 			enumDeclaration2.resolveBinding();
 		}
 		return enumDeclaration2;
+	}
+	private OhlEnumCaseDeclaration convertToOhlEnumCaseDeclaration(org.eclipse.jdt.internal.compiler.ast.TypeDeclaration typeDeclaration) {
+		throw new RuntimeException();
+//		checkCanceled();
+//		final EnumDeclaration enumDeclaration2 = new EnumDeclaration(this.ast);
+//		setModifiers(enumDeclaration2, typeDeclaration);
+//		final SimpleName typeName = new SimpleName(this.ast);
+//		typeName.internalSetIdentifier(new String(typeDeclaration.name));
+//		typeName.setSourceRange(typeDeclaration.sourceStart, typeDeclaration.sourceEnd - typeDeclaration.sourceStart + 1);
+//		enumDeclaration2.setName(typeName);
+//		enumDeclaration2.setSourceRange(typeDeclaration.declarationSourceStart, typeDeclaration.bodyEnd - typeDeclaration.declarationSourceStart + 1);
+//		
+//		org.eclipse.jdt.internal.compiler.ast.TypeReference[] superInterfaces = typeDeclaration.superInterfaces;
+//		if (superInterfaces != null) {
+//			for (int index = 0, length = superInterfaces.length; index < length; index++) {
+//				enumDeclaration2.superInterfaceTypes().add(convertType(superInterfaces[index]));
+//			}					
+//		}
+//		buildBodyDeclarations(typeDeclaration, enumDeclaration2);
+//		if (this.resolveBindings) {
+//			recordNodes(enumDeclaration2, typeDeclaration);
+//			recordNodes(typeName, typeDeclaration);
+//			enumDeclaration2.resolveBinding();
+//		}
+//		return enumDeclaration2;
 	}
 	public Expression convertToExpression(org.eclipse.jdt.internal.compiler.ast.Statement statement) {
 		if (statement instanceof org.eclipse.jdt.internal.compiler.ast.Expression) {

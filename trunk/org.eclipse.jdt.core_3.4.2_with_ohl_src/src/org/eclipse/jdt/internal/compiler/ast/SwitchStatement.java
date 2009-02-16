@@ -32,7 +32,10 @@ public class SwitchStatement extends Statement {
 	public int caseCount;
 	int[] constants;
 	
-	// fallthrough
+	// OHL
+	public QualifiedAllocationExpression ohlTodoAnonymousAlloc;
+	
+	
 	public final static int CASE = 0;
 	public final static int FALLTHROUGH = 1;
 	public final static int ESCAPING = 2;
@@ -43,6 +46,8 @@ public class SwitchStatement extends Statement {
 	// for local variables table attributes
 	int preSwitchInitStateIndex = -1;
 	int mergedInitStateIndex = -1;
+	public Block[] ohlCaseBlocks;
+  public boolean ohlHasExplicitDefault;
 
 	public FlowInfo analyseCode(
 			BlockScope currentScope,
