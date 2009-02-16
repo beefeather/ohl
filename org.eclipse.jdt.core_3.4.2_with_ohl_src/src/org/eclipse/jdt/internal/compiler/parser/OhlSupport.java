@@ -31,7 +31,6 @@ import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.jdt.internal.compiler.ast.ThrowStatement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
-import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 
@@ -43,6 +42,8 @@ public class OhlSupport {
 
   static void transformEnumCaseDeclaration(TypeDeclaration enumDeclaration) {
 
+    enumDeclaration.modifiers |= ClassFileConstants.AccStatic;    
+    
 		TypeReference[] superInterfaces = enumDeclaration.superInterfaces;
 		enumDeclaration.superInterfaces = null;
 
