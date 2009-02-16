@@ -42,6 +42,8 @@ public class QualifiedAllocationExpression extends AllocationExpression {
 	//qualification may be on both side
 	public Expression enclosingInstance;
 	public TypeDeclaration anonymousType;
+	// means visitor need synthetic method implementations
+	public boolean ohlIsVisitorImpl = false;
 	
 	public QualifiedAllocationExpression() {
 		// for subtypes

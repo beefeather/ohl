@@ -126,7 +126,10 @@ boolean canSkipInheritedMethods(MethodBinding one, MethodBinding two) {
 void checkAbstractMethod(MethodBinding abstractMethod) {
 	if (mustImplementAbstractMethod(abstractMethod.declaringClass)) {
 		TypeDeclaration typeDeclaration = this.type.scope.referenceContext;
-		if (typeDeclaration != null) {
+	  // OHL
+		if (typeDeclaration.allocation != null && typeDeclaration.allocation.ohlIsVisitorImpl) {
+      this.type.addSyntheticOhlMethod(abstractMethod);
+		} else if (typeDeclaration != null) {
 			MethodDeclaration missingAbstractMethod = typeDeclaration.addMissingAbstractMethodFor(abstractMethod);
 			missingAbstractMethod.scope.problemReporter().abstractMethodMustBeImplemented(this.type, abstractMethod);
 		} else {
@@ -457,6 +460,38 @@ void checkMethods() {
 			while (index >= 0) matchingInherited[index--] = null; // clear the contents of the matching methods
 		}
 	}
+}
+
+MethodBinding[] ohlFindUnimplementedMethods() {
+  boolean mustImplementAbstractMethods = mustImplementAbstractMethods();
+  boolean skipInheritedMethods = mustImplementAbstractMethods && canSkipInheritedMethods(); // have a single concrete superclass so only check overridden methods
+  char[][] methodSelectors = this.inheritedMethods.keyTable;
+  
+  MethodBinding[] res = new MethodBinding[methodSelectors.length];
+  int resPos = 0;
+  
+  nextSelector : for (int s = methodSelectors.length; --s >= 0;) {
+    if (methodSelectors[s] == null) continue nextSelector;
+
+    MethodBinding[] current = (MethodBinding[]) this.currentMethods.get(methodSelectors[s]);
+    if (current == null && skipInheritedMethods)
+      continue nextSelector;
+
+    MethodBinding[] inherited = (MethodBinding[]) this.inheritedMethods.valueTable[s];
+    if (inherited.length == 1 && current == null) { // handle the common case
+      if (mustImplementAbstractMethods && inherited[0].isAbstract()) {
+        if (mustImplementAbstractMethod(inherited[0].declaringClass)) {
+          res[resPos] = inherited[0];
+          resPos++;
+        }
+      }
+      continue nextSelector;
+    }
+  }
+  if (res.length != resPos) {
+    System.arraycopy(res, 0, res = new MethodBinding[resPos], 0, resPos);
+  }
+  return res;
 }
 
 void checkPackagePrivateAbstractMethod(MethodBinding abstractMethod) {
@@ -857,6 +892,13 @@ void verify(SourceTypeBinding someType) {
 	computeMethods();
 	computeInheritedMethods();
 	checkMethods();
+}
+
+MethodBinding[] ohlFindSynthMethods(SourceTypeBinding someType) {
+  this.type = someType;
+  computeMethods();
+  computeInheritedMethods();
+  return ohlFindUnimplementedMethods();
 }
 
 public String toString() {

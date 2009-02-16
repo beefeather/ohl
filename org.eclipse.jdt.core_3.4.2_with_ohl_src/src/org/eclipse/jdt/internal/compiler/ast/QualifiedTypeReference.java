@@ -19,6 +19,8 @@ public class QualifiedTypeReference extends TypeReference {
 
 	public char[][] tokens;
 	public long[] sourcePositions;
+	
+	final Exception debug = new Exception();
 
 	public QualifiedTypeReference(char[][] sources , long[] poss) {
 		

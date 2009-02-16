@@ -2576,6 +2576,13 @@ public void generateSyntheticBodyForSwitchTable(SyntheticMethodBinding methodBin
 	areturn();
 	this.removeVariable(localVariableBinding);
 }
+public void generateSyntheticBodyForOhlReturn0(SyntheticMethodBinding methodBinding) {
+  //ClassScope scope = ((SourceTypeBinding)methodBinding.declaringClass).scope;
+  initializeMaxLocals(methodBinding);
+
+  this.iconst_0();
+  this.ireturn();
+}
 /**
  * Code responsible to generate the suitable code to supply values for the synthetic enclosing
  * instance arguments of a constructor invocation of a nested type.
