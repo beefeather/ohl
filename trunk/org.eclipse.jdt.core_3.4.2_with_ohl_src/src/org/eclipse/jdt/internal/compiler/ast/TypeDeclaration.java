@@ -59,6 +59,8 @@ public class TypeDeclaration extends Statement implements ProblemSeverities, Ref
 
 	// 1.5 support
 	public TypeParameter[] typeParameters;
+	// OHL support
+  public boolean ohlIsEnumCase;
 	
 public TypeDeclaration(CompilationResult compilationResult){
 	this.compilationResult = compilationResult;

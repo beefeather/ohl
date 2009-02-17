@@ -65,6 +65,8 @@ public SourceTypeBinding(char[][] compoundName, PackageBinding fPackage, ClassSc
 	this.fields = Binding.UNINITIALIZED_FIELDS;
 	this.methods = Binding.UNINITIALIZED_METHODS;
 
+	ohlIsEnumCase = scope.referenceContext.ohlIsEnumCase;
+	
 	computeId();
 }
 
