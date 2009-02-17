@@ -242,7 +242,7 @@ public class ClassScope extends Scope {
 					case TypeDeclaration.INTERFACE_DECL :
 					case TypeDeclaration.ANNOTATION_TYPE_DECL :
 						if (sourceType.isNestedType()
-								&& sourceType.isClass() // no need to check for enum, since implicitly static
+								&& (sourceType.isClass() && !sourceType.ohlIsEnumCase) // no need to check for enum, since implicitly static
 								&& !sourceType.isStatic()) {
 							problemReporter().illegalLocalTypeDeclaration(memberContext);
 							continue nextMember;
@@ -384,7 +384,7 @@ public class ClassScope extends Scope {
 		if (isMemberType) {
 			modifiers |= (enclosingType.modifiers & (ExtraCompilerModifiers.AccGenericSignature|ClassFileConstants.AccStrictfp));
 			// checks for member types before local types to catch local members
-			if (enclosingType.isInterface())
+			if (enclosingType.isInterface() || enclosingType.ohlIsEnumCase)
 				modifiers |= ClassFileConstants.AccPublic;
 			if (sourceType.isEnum()) {
 				if (!enclosingType.isStatic())
@@ -615,6 +615,10 @@ public class ClassScope extends Scope {
 				// error the enclosing type of a static field must be static or a top-level type
 				problemReporter().illegalStaticModifierForMemberType(sourceType);
 			}
+		}
+		//OHL
+		if (this.referenceContext.ohlIsEnumCase) {
+		  sourceType.modifiers |= ClassFileConstants.AccStatic;
 		}
 
 		sourceType.modifiers = modifiers;

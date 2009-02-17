@@ -192,6 +192,9 @@ public class Block extends Statement {
 	}
 	
 	private static TypeReference binding2typeRef(TypeBinding typeBinding) {
+	  if (typeBinding == null) {
+	    return null;
+	  }
 		if (typeBinding instanceof CaptureBinding) {
 			CaptureBinding captureBinding = (CaptureBinding) typeBinding;
 			if (captureBinding.wildcard != null) {

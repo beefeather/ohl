@@ -39,6 +39,7 @@ abstract public class ReferenceBinding extends TypeBinding implements IDependent
 	char[] fileName;
 	char[] constantPoolName;
 	char[] signature;
+	public boolean ohlIsEnumCase;
 
 	private SimpleLookupTable compatibleCache;
 

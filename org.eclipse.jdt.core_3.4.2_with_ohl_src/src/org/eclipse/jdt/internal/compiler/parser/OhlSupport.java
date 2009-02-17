@@ -42,7 +42,7 @@ public class OhlSupport {
 
   static void transformEnumCaseDeclaration(TypeDeclaration enumDeclaration) {
 
-    enumDeclaration.modifiers |= ClassFileConstants.AccStatic;    
+    enumDeclaration.ohlIsEnumCase = true;
     
 		TypeReference[] superInterfaces = enumDeclaration.superInterfaces;
 		enumDeclaration.superInterfaces = null;
@@ -82,9 +82,21 @@ public class OhlSupport {
       }
 		}
 		
+		{
+		  int nextN;
+		  for (int n = 0; n != 11; n = nextN) {
+		    if (n == 3) {
+		      nextN = 2;
+		    } else {
+		      break;
+		    }
+		  }
+		}
+		
 		
 		// Case holder (where case classes lies)
 		TypeDeclaration caseHolderDeclaration = new TypeDeclaration(enumDeclaration.compilationResult);
+    setSourcePositionToPoint(caseHolderDeclaration, enumDeclaration.declarationSourceStart);
 		caseHolderDeclaration.enclosingType = enumDeclaration;
 		caseHolderDeclaration.modifiers |= ClassFileConstants.AccPublic | ClassFileConstants.AccInterface;
 		caseHolderDeclaration.name = CASE_HOLDER_INTERFACE_NAME.toCharArray();
@@ -104,6 +116,7 @@ public class OhlSupport {
       visitorDeclaration.enclosingType = enumDeclaration;
       visitorDeclaration.modifiers |= ClassFileConstants.AccPublic | ClassFileConstants.AccInterface;
       visitorDeclaration.name = VISITOR_INTERFACE_NAME.toCharArray();
+      setSourcePositionToPoint(visitorDeclaration, enumDeclaration.declarationSourceStart);
       
       if (superInterfaces != null) {
         visitorDeclaration.superInterfaces = new TypeReference[superInterfaces.length];
@@ -144,6 +157,7 @@ public class OhlSupport {
             factoryMethod = new MethodDeclaration(enumDeclaration.compilationResult);
             factoryMethod.selector = origMd.selector;
             factoryMethod.modifiers |= ClassFileConstants.AccStatic | ClassFileConstants.AccPublic;
+            setMethodSourcePosition(factoryMethod, origMd);
             
             if (origMd.arguments == null) {
             } else {
@@ -331,6 +345,25 @@ public class OhlSupport {
 //		}
 //		
 	}
+
+  private static void setMethodSourcePosition(MethodDeclaration newMethod,
+      MethodDeclaration origMd) {
+    newMethod.sourceStart = origMd.sourceStart;
+    newMethod.sourceEnd = origMd.sourceEnd;
+    newMethod.declarationSourceStart = origMd.sourceStart;
+    newMethod.declarationSourceEnd = origMd.sourceEnd;
+    // don't touch body positions, parser would try to parse otherwise
+  }
+
+  private static void setSourcePositionToPoint(TypeDeclaration typeDeclaration, int pos) {
+    typeDeclaration.declarationSourceStart
+        = typeDeclaration.declarationSourceEnd
+        = typeDeclaration.sourceStart
+        = typeDeclaration.sourceEnd 
+        = typeDeclaration.bodyStart
+        = typeDeclaration.bodyEnd 
+        = pos;
+  }
 
   public static Block convertSwitchStatement(SwitchStatement switchStatement, CompilationResult compilationResult) {
     int ohlCount = 0;

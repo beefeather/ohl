@@ -485,7 +485,7 @@ public class ClassFile implements TypeConstants, TypeIds {
 				// access flag
 				if (innerClass.isAnonymousType()) {
 					accessFlags &= ~ClassFileConstants.AccFinal;
-				} else if (innerClass.isMemberType() && innerClass.isInterface()) {
+				} else if (innerClass.isMemberType() && (innerClass.isInterface() || innerClass.ohlIsEnumCase)) {
 					accessFlags |= ClassFileConstants.AccStatic; // implicitely static
 				}
 				contents[contentsOffset++] = (byte) (accessFlags >> 8);
