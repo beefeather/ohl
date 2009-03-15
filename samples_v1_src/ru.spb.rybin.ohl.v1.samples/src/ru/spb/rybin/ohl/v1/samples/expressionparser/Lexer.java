@@ -6,12 +6,12 @@ public interface Lexer {
   void consume();
   
   public enum-case Tokens {
-	plus(),
-	minus(),
-	paren_open(),
-	paren_close(),
-	literal(int num),
-	identifier(String name),
-	eos()
+  	plus(),
+  	minus(),
+  	paren_open(),
+  	paren_close(),
+  	literal(int num),
+  	identifier(String name),
+  	eos()
   }
 }
