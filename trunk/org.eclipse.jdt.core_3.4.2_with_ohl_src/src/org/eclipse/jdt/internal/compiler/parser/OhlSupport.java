@@ -21,6 +21,7 @@ import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.NormalAnnotation;
 import org.eclipse.jdt.internal.compiler.ast.ParameterizedQualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedAllocationExpression;
+import org.eclipse.jdt.internal.compiler.ast.QualifiedNameReference;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
@@ -171,34 +172,39 @@ public class OhlSupport {
               }
             }
             
-            factoryMethod.returnType = new QualifiedTypeReference(
+            QualifiedTypeReference caseClassReference = new QualifiedTypeReference(
                 new char [] [] {
                     CASE_HOLDER_INTERFACE_NAME.toCharArray(),
                     (CASE_CLASS_PREFIX + new String(origMd.selector)).toCharArray()
                 },
                 new long [2]);
-            
-            AllocationExpression allocation = new AllocationExpression();
-            allocation.type = new QualifiedTypeReference(
-                new char [] [] {
-                    CASE_HOLDER_INTERFACE_NAME.toCharArray(),
-                    (CASE_CLASS_PREFIX + new String(origMd.selector)).toCharArray()
-                },
-                new long [2]);
+            factoryMethod.returnType = caseClassReference;
 
-            Expression [] allocationArguments;
+            Expression returnExpression;
             if (origMd.arguments == null) {
-              allocationArguments = null;
+              QualifiedNameReference fieldReference = new QualifiedNameReference(
+                new char [] [] {
+                  CASE_HOLDER_INTERFACE_NAME.toCharArray(),
+                  (CASE_CLASS_PREFIX + new String(origMd.selector)).toCharArray(),
+                  SINGLETON_FIELD_NAME.toCharArray()
+                
+                },
+                new long [3], 0 ,0);
+              returnExpression = fieldReference;
             } else {
+              AllocationExpression allocation = new AllocationExpression();
+              allocation.type = caseClassReference;
+  
               int argNumber = origMd.arguments.length;
-              allocationArguments = new Expression[argNumber];
+              Expression [] allocationArguments = new Expression[argNumber];
               for (int j=0; j<argNumber; j++) {
                 allocationArguments[j] = new SingleNameReference(origMd.arguments[j].name, 0);
               }
+              
+              allocation.arguments = allocationArguments;
+              returnExpression = allocation; 
             }
-            
-            allocation.arguments = allocationArguments;
-            Statement returnStatement = new ReturnStatement(allocation, 0, 0);
+            Statement returnStatement = new ReturnStatement(returnExpression, 0, 0);
             factoryMethod.statements = new Statement[] { returnStatement };
           }
           
@@ -231,19 +237,19 @@ public class OhlSupport {
           subClass.superclass = new ParameterizedQualifiedTypeReference(ENUM_CASE_BASE_TOKENS, typeArguments, 0, new long [] {0,0,0,0,0,0});
           subClass.modifiers |= ClassFileConstants.AccStatic;
           
-          // Constructor
           ConstructorDeclaration constructor;
+          // Constructor
           {
             constructor = new ConstructorDeclaration(enumDeclaration.compilationResult);
             constructor.selector = subClass.name; 
             constructor.modifiers |= ClassFileConstants.AccPublic;
+
             if (origMd.arguments == null) {
             } else {
               int argNumber = origMd.arguments.length;
               //Expression [] constrArguments = new Expression[argNumber];
               constructor.arguments = new Argument[argNumber];
               Statement[] constrStatements = new Statement[argNumber]; 
-
               for (int j=0; j<argNumber; j++) {
                 constructor.arguments[j] = 
                   new Argument(origMd.arguments[j].name, 0, origMd.arguments[j].type, 0);
@@ -295,6 +301,14 @@ public class OhlSupport {
           // Fields
           {
             if (origMd.arguments == null) {
+              FieldDeclaration field = new FieldDeclaration();
+              field.name = SINGLETON_FIELD_NAME.toCharArray();
+              field.type = new SingleTypeReference(subClass.name, 0);
+              field.modifiers |= ClassFileConstants.AccPublic | ClassFileConstants.AccFinal | ClassFileConstants.AccStatic;
+              AllocationExpression initializer = new AllocationExpression();
+              initializer.type = new SingleTypeReference(subClass.name, 0);
+              field.initialization = initializer;
+              subClass.fields = new FieldDeclaration[] { field };
             } else {
               int argNumber = origMd.arguments.length;
               FieldDeclaration[] fields = new FieldDeclaration[argNumber];
@@ -307,8 +321,10 @@ public class OhlSupport {
               subClass.fields = fields;
             }
           }
-          
+
           subClass.methods = new AbstractMethodDeclaration[] { constructor, acceptMethod };
+          subClass.addClinit();
+
           caseHolderDeclaration.memberTypes[i] = subClass;
         }
       }
@@ -561,6 +577,7 @@ public class OhlSupport {
       "EnumCaseBase".toCharArray()              
   };
 	public static final String CASE_HOLDER_INTERFACE_NAME = "C";
+  public static final String SINGLETON_FIELD_NAME = "instance";
 	
   static final int CASE_CODES_START = 2;
 }
