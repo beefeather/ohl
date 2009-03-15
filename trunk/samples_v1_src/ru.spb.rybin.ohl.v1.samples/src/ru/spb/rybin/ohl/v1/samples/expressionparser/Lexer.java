@@ -11,6 +11,7 @@ public interface Lexer {
 	paren_open(),
 	paren_close(),
 	literal(int num),
-	identifier(String name)
+	identifier(String name),
+	eos()
   }
 }
