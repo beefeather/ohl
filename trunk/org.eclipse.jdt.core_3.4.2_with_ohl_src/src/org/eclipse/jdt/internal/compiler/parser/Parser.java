@@ -6942,9 +6942,11 @@ private void consumeOhlSwitchDefault() {
   int lastStPos = astPtr + 1;
   astPtr = firstStPos - 1;
   
+  int sourceStart = this.intStack[this.intPtr--];
+  int sourceEnd = this.endStatementPosition;
   
   Expression exp = null; // default
-  CaseStatement caseSt = new CaseStatement(exp, 0, 0);
+  CaseStatement caseSt = new CaseStatement(exp, sourceStart + 1, sourceStart);
   caseSt.ohlIsOhlCase = true;
   
   int statementsLength = statementLen;
@@ -6960,8 +6962,8 @@ private void consumeOhlSwitchDefault() {
     0, 
     statementsLength);
   
-  block.sourceStart = this.intStack[this.intPtr--];
-  block.sourceEnd = this.endStatementPosition;
+  block.sourceStart = sourceStart;
+  block.sourceEnd = sourceEnd;
 
   BreakStatement breakSt = new BreakStatement(null, 0, 0);
   breakSt.ohlSynthetic = true;
@@ -6987,8 +6989,11 @@ private void consumeOhlSwitchLabel() {
 	astPtr = firstArgPos - 1;
 	
 	
-	Expression exp = new SingleNameReference("NULL".toCharArray(), 0);
-	CaseStatement caseSt = new CaseStatement(exp, 0, 0);
+  int sourceStart = this.intStack[this.intPtr--];
+  int sourceEnd = this.endStatementPosition;
+
+  Expression exp = new SingleNameReference("NULL".toCharArray(), 0);
+	CaseStatement caseSt = new CaseStatement(exp, sourceStart+1, sourceStart);
 	caseSt.ohlIsOhlCase = true;
 	
 	char[] selector = this.identifierStack[this.identifierPtr];
@@ -7060,8 +7065,8 @@ private void consumeOhlSwitchLabel() {
 		unpackSts.length, 
 		statementsLength);
 	
-	block.sourceStart = this.intStack[this.intPtr--];
-	block.sourceEnd = this.endStatementPosition;
+  block.sourceStart = sourceStart;
+  block.sourceEnd = sourceEnd;
 
 	BreakStatement breakSt = new BreakStatement(null, 0, 0);
 	breakSt.ohlSynthetic = true;
