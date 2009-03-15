@@ -140,6 +140,8 @@ public class OhlSupport {
           md.returnType = TypeReference.baseTypeReference(TypeIds.T_int, 0);
           md.arguments = origMd.arguments;
           
+          setMethodSourcePosition(md, origMd);
+          
           
           visitorDeclaration.methods[i] = md;
         }
@@ -354,6 +356,14 @@ public class OhlSupport {
     newMethod.declarationSourceEnd = origMd.sourceEnd;
     // don't touch body positions, parser would try to parse otherwise
   }
+  private static void setMethodSourcePosition(MethodDeclaration newMethod,
+      CaseStatement orig) {
+    newMethod.sourceStart = orig.sourceStart;
+    newMethod.sourceEnd = orig.sourceEnd;
+    newMethod.declarationSourceStart = orig.sourceStart;
+    newMethod.declarationSourceEnd = orig.sourceEnd;
+    // don't touch body positions, parser would try to parse otherwise
+  }
 
   private static void setSourcePositionToPoint(TypeDeclaration typeDeclaration, int pos) {
     typeDeclaration.declarationSourceStart
@@ -411,6 +421,7 @@ public class OhlSupport {
     TypeDeclaration anonymousType = new TypeDeclaration(compilationResult);
     anonymousType.name = CharOperation.NO_CHAR;
     anonymousType.bits |= (ASTNode.IsAnonymousType|ASTNode.IsLocalType);
+    setSourcePositionToPoint(anonymousType, switchStatement.sourceStart);
     
     QualifiedAllocationExpression alloc = new QualifiedAllocationExpression(anonymousType);
     alloc.anonymousType = anonymousType;
@@ -432,6 +443,7 @@ public class OhlSupport {
       CaseStatement caseSt = (CaseStatement) switchStatement.statements[caseStatePos[i]];
       
       MethodDeclaration md = new MethodDeclaration(compilationResult);
+      setMethodSourcePosition(md, caseSt);
       
       md.annotations = new Annotation [] { 
           new NormalAnnotation(new SingleTypeReference("Override".toCharArray(), 0), 0)
@@ -443,9 +455,13 @@ public class OhlSupport {
       md.modifiers |= ClassFileConstants.AccPublic;
 
       if (caseSt.ohlArgumentProto != null) {
-        md.arguments = new Argument[caseSt.ohlArgumentProto.length];
-        for (int j=0; j<md.arguments.length; j++) {
-          md.arguments[j] = new Argument(("ignore"+j).toCharArray(), 0, caseSt.ohlArgumentProto[j].type, 0);
+        if (caseSt.ohlArgumentProto.length == 0) {
+          md.arguments = null;
+        } else {
+          md.arguments = new Argument[caseSt.ohlArgumentProto.length];
+          for (int j=0; j<md.arguments.length; j++) {
+            md.arguments[j] = new Argument(("ignore"+j).toCharArray(), 0, caseSt.ohlArgumentProto[j].type, 0);
+          }
         }
       }
       

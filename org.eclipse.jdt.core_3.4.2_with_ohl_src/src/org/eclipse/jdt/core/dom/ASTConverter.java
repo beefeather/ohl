@@ -427,7 +427,7 @@ class ASTConverter {
 		methodName.internalSetIdentifier(new String(methodDeclaration.selector));
 		int start = methodDeclaration.sourceStart;
 		int end = retrieveIdentifierEndPosition(start, methodDeclaration.sourceEnd);
-		methodName.setSourceRange(start, end - start + 1);
+    methodName.setSourceRange(start, end - start + 1);
 		methodDecl.setName(methodName);
 		org.eclipse.jdt.internal.compiler.ast.TypeReference[] thrownExceptions = methodDeclaration.thrownExceptions;
 		int methodHeaderEnd = methodDeclaration.sourceEnd;
@@ -491,11 +491,17 @@ class ASTConverter {
 		}
 		int declarationSourceStart = methodDeclaration.declarationSourceStart;
 		int declarationSourceEnd = methodDeclaration.bodyEnd;
-		methodDecl.setSourceRange(declarationSourceStart, declarationSourceEnd - declarationSourceStart + 1);
+		// OHL
+		if (declarationSourceEnd > 0) {
+		  methodDecl.setSourceRange(declarationSourceStart, declarationSourceEnd - declarationSourceStart + 1);
+		}
 		int closingPosition = retrieveRightBraceOrSemiColonPosition(methodDeclaration.bodyEnd + 1, methodDeclaration.declarationSourceEnd);
 		if (closingPosition != -1) {
 			int startPosition = methodDecl.getStartPosition();
-			methodDecl.setSourceRange(startPosition, closingPosition - startPosition + 1);
+			// OHL
+			if (startPosition > 0) {
+			  methodDecl.setSourceRange(startPosition, closingPosition - startPosition + 1);
+			}
 
 			org.eclipse.jdt.internal.compiler.ast.Statement[] statements = methodDeclaration.statements;
 			
@@ -549,7 +555,10 @@ class ASTConverter {
 					}
 				}
 				int startPosition = methodDecl.getStartPosition();
-				methodDecl.setSourceRange(startPosition, end - startPosition + 1);
+				// OHL
+				if (end > 0) {
+  				methodDecl.setSourceRange(startPosition, end - startPosition + 1);
+				}
 				if (start != -1 && end != -1) {
 					/*
 					 * start or end can be equal to -1 if we have an interface's method.
