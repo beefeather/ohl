@@ -173,12 +173,16 @@ public class Block extends Statement {
 					if (subclass != null) {
 						FieldBinding[] fields = subclass.fields();
 						for (int j=0; j<fields.length; j++) {
-							LocalDeclaration fieldDecl = (LocalDeclaration) block.statements[fields.length - j];
-							FieldReference initialization = (FieldReference)fieldDecl.initialization;
-              initialization.token = fields[j].name;
-              if (finalVarName != null) {
-                ((SingleNameReference)initialization.receiver).token = finalVarName;
-              }
+						  // reverse order of statements/fields
+						  int statementPos = fields.length - j;
+						  if (statementPos >= 0 && statementPos < block.statements.length && block.statements[statementPos] instanceof LocalDeclaration) { 
+  							LocalDeclaration fieldDecl = (LocalDeclaration) block.statements[statementPos];
+  							FieldReference initialization = (FieldReference)fieldDecl.initialization;
+                initialization.token = fields[j].name;
+                if (finalVarName != null) {
+                  ((SingleNameReference)initialization.receiver).token = finalVarName;
+                }
+						  }
 						}
 					}
 				}
