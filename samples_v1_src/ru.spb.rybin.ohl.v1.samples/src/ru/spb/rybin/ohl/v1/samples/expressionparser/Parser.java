@@ -45,18 +45,14 @@ public class Parser {
 	  case * paren_open() {
 		 lexer.consume();
 		 AstNode inner = parseExpression();
-         switch (lexer.peek()) {
-         case * paren_close() {
-        	 // fall-through
-         }
-         default * {
+		 if (lexer.peek() != Lexer.Tokens.paren_close()) {
         	 throw new ParserException("')' expected");
-         }
-         }
+		 }
 		 lexer.consume();
 		 return inner;
 	  }
 	  case * literal(final int value) {
+		  lexer.consume();
 		  return new AstConstant() {
 			  public int getValue() {
 				  return value;
@@ -67,6 +63,7 @@ public class Parser {
 		  };
 	  }
 	  case * identifier(final String name) {
+		  lexer.consume();
 		  return new AstVariable() {
 			  public String getName() {
 				  return name;

@@ -2,6 +2,7 @@ package ru.spb.rybin.ohl.v1.samples.expressionparser;
 
 public class PerlExpressionGenerator {
   public static void generate(AstNode node, StringBuilder output) {
+	  output.append('(');
 	  switch (node.getSubtype()) {
 	  case * addition(AstBinaryOperation addition) {
 		  generate(addition.getLeft(), output);
@@ -20,5 +21,6 @@ public class PerlExpressionGenerator {
 		  output.append("$" + variable.getName());  
 	  }
 	  }
+	  output.append(')');
   }
 }
