@@ -2583,6 +2583,15 @@ public void generateSyntheticBodyForOhlReturn0(SyntheticMethodBinding methodBind
   this.iconst_0();
   this.ireturn();
 }
+public void generateSyntheticBodyForOhlReturnThis(SyntheticMethodBinding methodBinding,
+    MethodBinding visitMethodBinding) {
+  initializeMaxLocals(methodBinding);
+
+  this.aload_1();
+  this.aload_0();
+  this.invokeinterface(visitMethodBinding);
+  ireturn();
+}
 /**
  * Code responsible to generate the suitable code to supply values for the synthetic enclosing
  * instance arguments of a constructor invocation of a nested type.

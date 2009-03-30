@@ -121,7 +121,9 @@ public class Block extends Statement {
   			  }
 				}
 				
-				declSt.type = binding2typeRef(exprType); 
+				if (exprType != null) {
+	        declSt.type = binding2typeRef(exprType); 
+				}
 
  		    // ru.spb.rybin.ohl.lang.EnumCaseBase<? super Visitor>
       	char [][] enum_case_base_tokens = OhlSupport.ENUM_CASE_BASE_TOKENS;
@@ -145,45 +147,59 @@ public class Block extends Statement {
 				SwitchStatement switchSt = (SwitchStatement) this.statements[1];
 				
 				
-				if (visitorType != null) {
+				if (visitorType == null) {
+				  switchSt.ohlTodoAnonymousAlloc.type = new SingleTypeReference("unknown_type".toCharArray(), 0);
+				} else {
     				switchSt.ohlTodoAnonymousAlloc.type = binding2typeRef(visitorType);
 				}
 
 				for (int i=0; i<switchSt.ohlCaseBlocks.length; i++) {
 					Block block = switchSt.ohlCaseBlocks[i];
+          
 					LocalDeclaration decl1 = (LocalDeclaration) block.statements[0];
-					if (finalVarName != null) {
-					  decl1.name = finalVarName;
-					  decl1.ohlRedefineForCast = true;
-					}
-					char[] selector = ((SingleTypeReference)decl1.type).token;
-					QualifiedTypeReference [] typeRefCopies = new QualifiedTypeReference[3];
-					for (int j=0; j<typeRefCopies.length; j++) {
-						QualifiedTypeReference typeRef = (QualifiedTypeReference) binding2typeRef(visitorType);
-						QualifiedTypeReference memberType = (QualifiedTypeReference) OhlSupport.convertToMemberType(typeRef, selector);
-						
-						char [] [] tokens = memberType.tokens;
-						tokens[tokens.length-2] = OhlSupport.CASE_HOLDER_INTERFACE_NAME.toCharArray();
-						typeRefCopies[j] = memberType;
-					}
-					decl1.type = typeRefCopies[0];
-					((CastExpression)decl1.initialization).type = typeRefCopies[1];
-					
-					ReferenceBinding subclass = (ReferenceBinding)typeRefCopies[2].resolveType(scope);
-					if (subclass != null) {
-						FieldBinding[] fields = subclass.fields();
-						for (int j=0; j<fields.length; j++) {
-						  // reverse order of statements/fields
-						  int statementPos = fields.length - j;
-						  if (statementPos >= 0 && statementPos < block.statements.length && block.statements[statementPos] instanceof LocalDeclaration) { 
-  							LocalDeclaration fieldDecl = (LocalDeclaration) block.statements[statementPos];
-  							FieldReference initialization = (FieldReference)fieldDecl.initialization;
-                initialization.token = fields[j].name;
-                if (finalVarName != null) {
-                  ((SingleNameReference)initialization.receiver).token = finalVarName;
+          if (finalVarName != null && decl1.name == OhlSupport.NO_TAG_IDENTIFIER) {
+            decl1.name = finalVarName;
+            decl1.ohlRedefineForCast = true;
+          }
+          if (decl1.name == OhlSupport.NO_TAG_IDENTIFIER) {
+            decl1.name = "caseEnumTempVarNotUsed".toCharArray();
+          }
+          
+					switch (switchSt.ohlCaseStatements[i].ohlCaseType) {
+          case CaseStatement.OHL_TYPE_CASE: {
+            
+          } break;
+          case CaseStatement.OHL_STRUCT_CASE: {
+            char[] selector = ((SingleTypeReference)decl1.type).token;
+            QualifiedTypeReference [] typeRefCopies = new QualifiedTypeReference[3];
+            for (int j=0; j<typeRefCopies.length; j++) {
+              QualifiedTypeReference typeRef = (QualifiedTypeReference) binding2typeRef(visitorType);
+              QualifiedTypeReference memberType = (QualifiedTypeReference) OhlSupport.convertToMemberType(typeRef, selector, true);
+              
+              char [] [] tokens = memberType.tokens;
+              tokens[tokens.length-2] = OhlSupport.CASE_HOLDER_INTERFACE_NAME.toCharArray();
+              typeRefCopies[j] = memberType;
+            }
+            decl1.type = typeRefCopies[0];
+            ((CastExpression)decl1.initialization).type = typeRefCopies[1];
+            
+            ReferenceBinding subclass = (ReferenceBinding)typeRefCopies[2].resolveType(scope);
+            if (subclass != null) {
+              FieldBinding[] fields = subclass.fields();
+              for (int j=0; j<fields.length; j++) {
+                // reverse order of statements/fields
+                int statementPos = fields.length - j;
+                if (statementPos >= 0 && statementPos < block.statements.length && block.statements[statementPos] instanceof LocalDeclaration) { 
+                  LocalDeclaration fieldDecl = (LocalDeclaration) block.statements[statementPos];
+                  FieldReference initialization = (FieldReference)fieldDecl.initialization;
+                  initialization.token = fields[j].name;
+                  if (finalVarName != null) {
+                    ((SingleNameReference)initialization.receiver).token = finalVarName;
+                  }
                 }
-						  }
-						}
+              }
+            }
+          } break;
 					}
 				}
 			}
@@ -199,7 +215,7 @@ public class Block extends Statement {
 	  if (typeBinding == null) {
 	    return null;
 	  }
-		if (typeBinding instanceof CaptureBinding) {
+	  if (typeBinding instanceof CaptureBinding) {
 			CaptureBinding captureBinding = (CaptureBinding) typeBinding;
 			if (captureBinding.wildcard != null) {
 				Wildcard res = new Wildcard(captureBinding.wildcard.boundKind);
@@ -208,6 +224,10 @@ public class Block extends Statement {
 			}
 			throw new RuntimeException();
 		}
+    if (typeBinding instanceof TypeVariableBinding) {
+      TypeVariableBinding var = (TypeVariableBinding)typeBinding;
+      return new SingleTypeReference(var.sourceName, 0);
+    }
 		
 		char[] fullName = typeBinding.qualifiedSourceName();
 		char [] packageName = typeBinding.qualifiedPackageName();

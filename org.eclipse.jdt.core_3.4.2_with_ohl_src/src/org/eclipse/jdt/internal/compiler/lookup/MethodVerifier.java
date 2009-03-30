@@ -10,9 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.compiler.impl.Constant;
+import org.eclipse.jdt.internal.compiler.impl.StringConstant;
+import org.eclipse.jdt.internal.compiler.parser.OhlSupport;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.jdt.internal.compiler.util.HashtableOfObject;
 import org.eclipse.jdt.internal.compiler.util.SimpleSet;
@@ -127,7 +131,51 @@ void checkAbstractMethod(MethodBinding abstractMethod) {
 	if (mustImplementAbstractMethod(abstractMethod.declaringClass)) {
 		TypeDeclaration typeDeclaration = this.type.scope.referenceContext;
 	  // OHL
-		if (typeDeclaration.allocation != null && typeDeclaration.allocation.ohlIsVisitorImpl) {
+		MethodBinding visitMethod = null;
+		if (CharOperation.equals(abstractMethod.declaringClass.compoundName, OhlSupport.ENUM_CASE_BASE_TOKENS)
+		    && CharOperation.equals(abstractMethod.selector, OhlSupport.ACCEPT_METHOD_SELECTOR)) {
+		  TypeBinding arg1 = abstractMethod.parameters[0];
+		  if (arg1 instanceof ReferenceBinding) {
+		    ReferenceBinding argRefBinding = (ReferenceBinding) arg1;
+        String tagName = null; 
+        InvocationSite invocationSite = new InvocationSite() {
+          public TypeBinding[] genericTypeArguments() {
+            return null;
+          }
+          public boolean isSuperAccess() {
+            return false;
+          }
+          public boolean isTypeAccess() {
+            return false;
+          }
+          public void setActualReceiverType(ReferenceBinding receiverType) {
+          }
+          public void setDepth(int depth) {
+          }
+          public void setFieldIndex(int depth) {
+          }
+          public int sourceEnd() {
+            return 0;
+          }
+          public int sourceStart() {
+            return 0;
+          }
+        };
+		    String methodSelector = OhlSupport.VISITOR_TYPE_METHOD_PREFIX + tagName;
+		      
+        MethodBinding exactMethod = this.type.scope.getMethod(argRefBinding, methodSelector.toCharArray(),
+            new TypeBinding[] { this.type }, invocationSite);
+		    if (exactMethod != null && exactMethod.problemId() == ProblemReasons.NoError
+		        && this.type.isCompatibleWith(exactMethod.parameters[0])) {
+	        visitMethod = exactMethod;
+		    }
+		  }
+		}
+		if (visitMethod != null) {
+      SyntheticMethodBinding fineAccept = this.type.addSyntheticOhlVisitThisMethod(abstractMethod, visitMethod);
+      this.type.addSyntheticBridgeMethod(abstractMethod.original(), fineAccept);
+		} else if (typeDeclaration.allocation != null && typeDeclaration.allocation.ohlIsVisitorImpl) {
+		  // OHL
       this.type.addSyntheticOhlMethod(abstractMethod);
 		} else if (typeDeclaration != null) {
 			MethodDeclaration missingAbstractMethod = typeDeclaration.addMissingAbstractMethodFor(abstractMethod);
@@ -460,38 +508,6 @@ void checkMethods() {
 			while (index >= 0) matchingInherited[index--] = null; // clear the contents of the matching methods
 		}
 	}
-}
-
-MethodBinding[] ohlFindUnimplementedMethods() {
-  boolean mustImplementAbstractMethods = mustImplementAbstractMethods();
-  boolean skipInheritedMethods = mustImplementAbstractMethods && canSkipInheritedMethods(); // have a single concrete superclass so only check overridden methods
-  char[][] methodSelectors = this.inheritedMethods.keyTable;
-  
-  MethodBinding[] res = new MethodBinding[methodSelectors.length];
-  int resPos = 0;
-  
-  nextSelector : for (int s = methodSelectors.length; --s >= 0;) {
-    if (methodSelectors[s] == null) continue nextSelector;
-
-    MethodBinding[] current = (MethodBinding[]) this.currentMethods.get(methodSelectors[s]);
-    if (current == null && skipInheritedMethods)
-      continue nextSelector;
-
-    MethodBinding[] inherited = (MethodBinding[]) this.inheritedMethods.valueTable[s];
-    if (inherited.length == 1 && current == null) { // handle the common case
-      if (mustImplementAbstractMethods && inherited[0].isAbstract()) {
-        if (mustImplementAbstractMethod(inherited[0].declaringClass)) {
-          res[resPos] = inherited[0];
-          resPos++;
-        }
-      }
-      continue nextSelector;
-    }
-  }
-  if (res.length != resPos) {
-    System.arraycopy(res, 0, res = new MethodBinding[resPos], 0, resPos);
-  }
-  return res;
 }
 
 void checkPackagePrivateAbstractMethod(MethodBinding abstractMethod) {
@@ -892,13 +908,6 @@ void verify(SourceTypeBinding someType) {
 	computeMethods();
 	computeInheritedMethods();
 	checkMethods();
-}
-
-MethodBinding[] ohlFindSynthMethods(SourceTypeBinding someType) {
-  this.type = someType;
-  computeMethods();
-  computeInheritedMethods();
-  return ohlFindUnimplementedMethods();
 }
 
 public String toString() {
