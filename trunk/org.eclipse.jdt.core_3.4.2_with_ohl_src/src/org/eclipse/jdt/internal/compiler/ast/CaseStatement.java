@@ -29,8 +29,12 @@ public class CaseStatement extends Statement {
 	public Expression constantExpression;
 	public CaseLabel targetLabel;
 	
-	// OHL
-	public boolean ohlIsOhlCase;
+  // OHL
+  public static final int OHL_NOT_OHL = 0;
+  public static final int OHL_STRUCT_CASE = 1;
+  public static final int OHL_TYPE_CASE = 2;
+  public static final int OHL_DEFAULT_CASE = 3;
+	public int ohlCaseType = 0;
 	// need type here
 	// need expression here
 	public CastExpression ohlTodoCastExpression;

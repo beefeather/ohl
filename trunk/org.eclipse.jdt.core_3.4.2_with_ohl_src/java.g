@@ -479,8 +479,8 @@ ClassHeaderImplements ::= 'implements' InterfaceTypeList
 /.$putCase consumeClassHeaderImplements(); $break ./
 /:$readableName ClassHeaderImplements:/
 
-InterfaceTypeList -> InterfaceType
-InterfaceTypeList ::= InterfaceTypeList ',' InterfaceType
+InterfaceTypeList -> OhlInterfaceType
+InterfaceTypeList ::= InterfaceTypeList ',' OhlInterfaceType
 /.$putCase consumeInterfaceTypeList(); $break ./
 /:$readableName InterfaceTypeList:/
 
@@ -2292,12 +2292,13 @@ OhlEnumCaseHeader ::= OhlEnumCaseHeaderName InterfaceHeaderExtendsopt
 /. $putCase consumeOhlEnumCaseHeader(); $break ./
 /:$readableName OhlEnumCaseHeader:/
 
-OhlEnumCaseHeaderName ::= Modifiersopt 'enum' '-' 'case' Identifier
+OhlEnumCaseHeaderName ::= OhlEnumCaseHeaderName1 TypeParameters
+/.$putCase consumeOhlEnumCaseHeaderNameWithTypeParameters(); $break ./
+
+OhlEnumCaseHeaderName -> OhlEnumCaseHeaderName1
+
+OhlEnumCaseHeaderName1 ::= Modifiersopt 'enum' '-' 'case' Identifier
 /. $putCase consumeOhlEnumCaseHeaderName(); $break ./
-/:$compliance 1.5:/
-OhlEnumCaseHeaderName ::= Modifiersopt 'enum' '-' 'case' Identifier TypeParameters
-/. $putCase consumeOhlEnumCaseHeaderNameWithTypeParameters(); $break ./
-/:$readableName OhlEnumCaseHeaderName:/
 /:$compliance 1.5:/
 
 OhlEnumCaseBody ::= '{' OhlEnumCaseConstants '}'
@@ -2311,27 +2312,71 @@ OhlEnumCaseConstants ::= OhlEnumCaseConstants ',' OhlEnumCaseConstant
 /.$putCase consumeOhlEnumCaseConstants(); $break ./
 /:$readableName OhlEnumCaseConstants:/
 
-OhlEnumCaseConstantHeaderName ::= Modifiersopt Identifier '('
+OhlEnumCaseConstant ::= OhlEnumCaseStructConstant
+OhlEnumCaseConstant ::= OhlEnumCaseTypeConstant
+
+OhlEnumCaseStructConstantHeaderName ::= 'case' Identifier '('
+/.$putCase consumeOhlEnumCaseConstantHeaderNameWithTag(); $break ./
+/:$readableName OhlEnumCaseStructConstantHeaderName:/
+
+OhlEnumCaseStructConstantHeaderName ::= 'case' '('
 /.$putCase consumeOhlEnumCaseConstantHeaderName(); $break ./
-/:$readableName OhlEnumCaseConstantHeaderName:/
+/:$readableName OhlEnumCaseStructConstantHeaderName:/
 
-OhlEnumCaseConstantHeader ::= OhlEnumCaseConstantHeaderName ForceNoDiet FormalParameterListopt RestoreDiet OhlEnumCaseConstantHeaderRightParen 
-/.$putCase consumeOhlEnumCaseConstantHeader(); $break ./
-/:$readableName OhlEnumCaseConstantHeader:/
+OhlEnumCaseStructConstantHeader ::= OhlEnumCaseStructConstantHeaderName ForceNoDiet FormalParameterListopt RestoreDiet OhlEnumCaseStructConstantHeaderRightParen 
+/.$putCase consumeOhlEnumCaseStructConstantHeader(); $break ./
+/:$readableName OhlEnumCaseStructConstantHeader:/
 
-OhlEnumCaseConstantHeaderRightParen ::= ')'
-/.$putCase consumeOhlEnumCaseConstantHeaderRightParen (); $break ./
+OhlEnumCaseStructConstantHeaderRightParen ::= ')'
+/.$putCase consumeOhlEnumCaseStructConstantHeaderRightParen (); $break ./
 /:$readableName ):/
 /:$recovery_template ):/
 
-OhlEnumCaseConstant ::= OhlEnumCaseConstantHeader
-/.$putCase consumeOhlEnumCaseConstant(); $break ./
-/:$readableName OhlEnumCaseConstant:/
+OhlEnumCaseStructConstant ::= OhlEnumCaseStructConstantHeader
+/.$putCase consumeOhlEnumCaseStructConstant(); $break ./
+/:$readableName OhlEnumCaseStructConstant:/
+
+
+OhlEnumCaseTypeConstant ::= ReferenceType
+/.$putCase consumeOhlEnumCaseTypeConstant(); $break ./
+
+OhlEnumCaseTypeConstant ::= ReferenceType Identifier
+/.$putCase consumeOhlEnumCaseTypeConstantWithTag(); $break ./
+
+
+
+
+OhlInterfaceType ::= ClassOrInterfaceType
+/.$putCase consumeInterfaceType(); $break ./
+/:$readableName InterfaceType:/
+
+--OhlInterfaceType ::= 'case' OhlEnumCaseImplements
+--OhlInterfaceType ::= 'case' OhlEnumCaseImplementsWithTag
+OhlInterfaceType ::= 'case'
+/.$putCase consumeOhlEnumCaseImplements(); $break ./
+
+--OhlEnumCaseImplements ::= ClassOrInterfaceType
+--/.$putCase consumeOhlEnumCaseImplements(); $break ./
+
+--OhlEnumCaseImplementsWithTag ::= ClassOrInterfaceType Identifier
+--/.$putCase consumeOhlEnumCaseImplementsWithTag(); $break ./
+
+
 
 -- Client side
 
 SwitchLabel ::= 'case' '*' Identifier '(' FormalParameterListopt ')' '{' BlockStatementsopt  '}'
-/. $putCase consumeOhlSwitchLabel(); $break ./
+/. $putCase consumeOhlSwitchStructLabel(); $break ./
+
+SwitchLabel ::= 'case' OhlSwitchLabelQualifier '{' BlockStatementsopt  '}'
+/. $putCase consumeOhlSwitchTypeLabel(); $break ./
+
+OhlSwitchLabelQualifier ::= 'instanceof' ReferenceType Identifier
+/. $putCase consumeOhlSwitchLabelQualifier(true); $break ./
+
+OhlSwitchLabelQualifier ::= 'instanceof' ReferenceType
+/. $putCase consumeOhlSwitchLabelQualifier(false); $break ./
+
 
 SwitchLabel ::= 'default' '*' '{' BlockStatementsopt  '}'
 /. $putCase consumeOhlSwitchDefault(); $break ./
@@ -2345,12 +2390,12 @@ ReferenceType  -> OhlCaseType
 OhlCaseType ::= Name '.' 'case'
 /.$putCase consumeOhlCaseType();  $break ./
 /:$readableName OhlCaseType:/
-OhlCaseType ::= GenericType '.' Name '.' 'case'
-/.$putCase consumeOhlCaseGenericNameType();  $break ./
-/:$readableName OhlCaseType:/
 OhlCaseType ::= GenericType '.' 'case'
 /.$putCase consumeOhlCaseGenericType();  $break ./
 /:$readableName OhlCaseType:/
+--OhlCaseType ::= GenericType '.' Name '.' 'case'
+--/.$putCase consumeOhlCaseGenericNameType();  $break ./
+--/:$readableName OhlCaseType:/
 
 
 

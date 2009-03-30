@@ -62,7 +62,7 @@ public class Parser implements  ParserBasicInformation, TerminalTokens, Operator
     
 	public static short check_table[] = null;
 	public static final int CurlyBracket = 2;
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = true;
 	private static final boolean DEBUG_AUTOMATON = false;
 	private static final String EOF_TOKEN = "$eof" ; //$NON-NLS-1$
 	private static final String ERROR_TOKEN = "$error" ; //$NON-NLS-1$
@@ -2199,8 +2199,12 @@ protected void consumeClassDeclaration() {
 		typeDecl.bits |= ASTNode.UndocumentedEmptyBlock;
 	}
 
-	typeDecl.declarationSourceEnd = flushCommentsDefinedPriorTo(this.endStatementPosition); 
+	typeDecl.declarationSourceEnd = flushCommentsDefinedPriorTo(this.endStatementPosition);
+	
+	OhlSupport.addVisitorToClassifier(typeDecl);
 }
+
+
 protected void consumeClassHeader() {
 	// ClassHeader ::= ClassHeaderName ClassHeaderExtendsopt ClassHeaderImplementsopt
 
@@ -3932,6 +3936,8 @@ protected void consumeInterfaceDeclaration() {
 		typeDecl.bits |= ASTNode.UndocumentedEmptyBlock;
 	}
 	typeDecl.declarationSourceEnd = flushCommentsDefinedPriorTo(this.endStatementPosition); 
+  
+  OhlSupport.addVisitorToClassifier(typeDecl);
 }
 protected void consumeInterfaceHeader() {
 	// InterfaceHeader ::= InterfaceHeaderName InterfaceHeaderExtendsopt
@@ -5136,6 +5142,8 @@ protected void consumeRightParen() {
 	// PushRPAREN ::= ')'
 	pushOnIntStack(this.rParenPos);
 }
+
+
 //This method is part of an automatic generation : do NOT edit-modify  
 protected void consumeRule(int act) {
   switch ( act ) {
@@ -6821,59 +6829,87 @@ protected void consumeRule(int act) {
         consumeOhlEnumCaseHeader();  
       break;
  
-     case 708 : if (DEBUG) { System.out.println("OhlEnumCaseHeaderName ::= Modifiersopt enum MINUS case"); }  //$NON-NLS-1$
-        consumeOhlEnumCaseHeaderName();  
-      break;
- 
-     case 709 : if (DEBUG) { System.out.println("OhlEnumCaseHeaderName ::= Modifiersopt enum MINUS case"); }  //$NON-NLS-1$
+    case 708 : if (DEBUG) { System.out.println("OhlEnumCaseHeaderName ::= OhlEnumCaseHeaderName1..."); }  //$NON-NLS-1$
         consumeOhlEnumCaseHeaderNameWithTypeParameters();  
       break;
  
-     case 710 : if (DEBUG) { System.out.println("OhlEnumCaseBody ::= LBRACE OhlEnumCaseConstants RBRACE"); }  //$NON-NLS-1$
+     case 710 : if (DEBUG) { System.out.println("OhlEnumCaseHeaderName1 ::= Modifiersopt enum MINUS case"); }  //$NON-NLS-1$
+        consumeOhlEnumCaseHeaderName();  
+      break;
+ 
+     case 711 : if (DEBUG) { System.out.println("OhlEnumCaseBody ::= LBRACE OhlEnumCaseConstants RBRACE"); }  //$NON-NLS-1$
         consumeOhlEnumCaseBodyWithConstants();  
       break;
  
-     case 711 : if (DEBUG) { System.out.println("OhlEnumCaseBody ::= LBRACE RBRACE"); }  //$NON-NLS-1$
+     case 712 : if (DEBUG) { System.out.println("OhlEnumCaseBody ::= LBRACE RBRACE"); }  //$NON-NLS-1$
         consumeOhlEnumCaseEmptyBody();  
       break;
  
-    case 713 : if (DEBUG) { System.out.println("OhlEnumCaseConstants ::= OhlEnumCaseConstants COMMA..."); }  //$NON-NLS-1$
+    case 714 : if (DEBUG) { System.out.println("OhlEnumCaseConstants ::= OhlEnumCaseConstants COMMA..."); }  //$NON-NLS-1$
         consumeOhlEnumCaseConstants();  
       break;
  
-    case 714 : if (DEBUG) { System.out.println("OhlEnumCaseConstantHeaderName ::= Modifiersopt..."); }  //$NON-NLS-1$
+    case 717 : if (DEBUG) { System.out.println("OhlEnumCaseStructConstantHeaderName ::= case Identifier"); }  //$NON-NLS-1$
+        consumeOhlEnumCaseConstantHeaderNameWithTag();  
+      break;
+ 
+    case 718 : if (DEBUG) { System.out.println("OhlEnumCaseStructConstantHeaderName ::= case LPAREN"); }  //$NON-NLS-1$
         consumeOhlEnumCaseConstantHeaderName();  
       break;
  
-    case 715 : if (DEBUG) { System.out.println("OhlEnumCaseConstantHeader ::=..."); }  //$NON-NLS-1$
-        consumeOhlEnumCaseConstantHeader();  
+    case 719 : if (DEBUG) { System.out.println("OhlEnumCaseStructConstantHeader ::=..."); }  //$NON-NLS-1$
+        consumeOhlEnumCaseStructConstantHeader();  
       break;
  
-    case 716 : if (DEBUG) { System.out.println("OhlEnumCaseConstantHeaderRightParen ::= RPAREN"); }  //$NON-NLS-1$
-        consumeOhlEnumCaseConstantHeaderRightParen ();  
+    case 720 : if (DEBUG) { System.out.println("OhlEnumCaseStructConstantHeaderRightParen ::= RPAREN"); }  //$NON-NLS-1$
+        consumeOhlEnumCaseStructConstantHeaderRightParen ();  
       break;
  
-    case 717 : if (DEBUG) { System.out.println("OhlEnumCaseConstant ::= OhlEnumCaseConstantHeader"); }  //$NON-NLS-1$
-        consumeOhlEnumCaseConstant();  
+    case 721 : if (DEBUG) { System.out.println("OhlEnumCaseStructConstant ::=..."); }  //$NON-NLS-1$
+        consumeOhlEnumCaseStructConstant();  
       break;
  
-     case 718 : if (DEBUG) { System.out.println("SwitchLabel ::= case MULTIPLY Identifier LPAREN..."); }  //$NON-NLS-1$
-        consumeOhlSwitchLabel();  
+    case 722 : if (DEBUG) { System.out.println("OhlEnumCaseTypeConstant ::= ReferenceType"); }  //$NON-NLS-1$
+        consumeOhlEnumCaseTypeConstant();  
       break;
  
-     case 719 : if (DEBUG) { System.out.println("SwitchLabel ::= default MULTIPLY LBRACE..."); }  //$NON-NLS-1$
+    case 723 : if (DEBUG) { System.out.println("OhlEnumCaseTypeConstant ::= ReferenceType Identifier"); }  //$NON-NLS-1$
+        consumeOhlEnumCaseTypeConstantWithTag();  
+      break;
+ 
+    case 724 : if (DEBUG) { System.out.println("OhlInterfaceType ::= ClassOrInterfaceType"); }  //$NON-NLS-1$
+        consumeInterfaceType();  
+      break;
+ 
+    case 725 : if (DEBUG) { System.out.println("OhlInterfaceType ::= case"); }  //$NON-NLS-1$
+        consumeOhlEnumCaseImplements();  
+      break;
+ 
+     case 726 : if (DEBUG) { System.out.println("SwitchLabel ::= case MULTIPLY Identifier LPAREN..."); }  //$NON-NLS-1$
+        consumeOhlSwitchStructLabel();  
+      break;
+ 
+     case 727 : if (DEBUG) { System.out.println("SwitchLabel ::= case OhlSwitchLabelQualifier LBRACE..."); }  //$NON-NLS-1$
+        consumeOhlSwitchTypeLabel();  
+      break;
+ 
+     case 728 : if (DEBUG) { System.out.println("OhlSwitchLabelQualifier ::= instanceof ReferenceType..."); }  //$NON-NLS-1$
+        consumeOhlSwitchLabelQualifier(true);  
+      break;
+ 
+     case 729 : if (DEBUG) { System.out.println("OhlSwitchLabelQualifier ::= instanceof ReferenceType"); }  //$NON-NLS-1$
+        consumeOhlSwitchLabelQualifier(false);  
+      break;
+ 
+     case 730 : if (DEBUG) { System.out.println("SwitchLabel ::= default MULTIPLY LBRACE..."); }  //$NON-NLS-1$
         consumeOhlSwitchDefault();  
       break;
  
-    case 721 : if (DEBUG) { System.out.println("OhlCaseType ::= Name DOT case"); }  //$NON-NLS-1$
+    case 732 : if (DEBUG) { System.out.println("OhlCaseType ::= Name DOT case"); }  //$NON-NLS-1$
         consumeOhlCaseType();   
       break;
  
-    case 722 : if (DEBUG) { System.out.println("OhlCaseType ::= GenericType DOT Name DOT case"); }  //$NON-NLS-1$
-        consumeOhlCaseGenericNameType();   
-      break;
- 
-    case 723 : if (DEBUG) { System.out.println("OhlCaseType ::= GenericType DOT case"); }  //$NON-NLS-1$
+    case 733 : if (DEBUG) { System.out.println("OhlCaseType ::= GenericType DOT case"); }  //$NON-NLS-1$
         consumeOhlCaseGenericType();   
       break;
  
@@ -6881,11 +6917,64 @@ protected void consumeRule(int act) {
 }
 
 
-private void consumeOhlCaseGenericType() {
-	throw new UnsupportedOperationException();
+
+private void consumeOhlSwitchLabelQualifier(boolean hasTag) {
+  char [] tag;
+  if (hasTag) {
+    tag = identifierStack[identifierPtr--];
+  } else {
+    tag = OhlSupport.NO_TAG_IDENTIFIER;
+  }
+  TypeReference type = getTypeReference(0);
+  
+  FieldDeclaration fd = new FieldDeclaration();
+  fd.type = type;
+  fd.name = tag;
+  pushOnAstStack(fd);
 }
-private void consumeOhlCaseGenericNameType() {
-	throw new UnsupportedOperationException();
+
+//private void consumeOhlEnumCaseImplementsWithTag() {
+//  char [] tag = identifierStack[identifierPtr--];
+//  
+//  TypeReference type = getTypeReference(0);
+//  
+//  TypeReference visitorRef = OhlSupport.convertToMemberType(type, OhlSupport.VISITOR_INTERFACE_NAME.toCharArray(), true);
+//  ParameterizedQualifiedTypeReference caseBaseType = OhlSupport.makeEnumCaseBaseRefernce(visitorRef);
+//  // here is a problem with separate compilation: this tag doesn't get saved in byte-code :(
+//  caseBaseType.ohlImplementsTag = tag;
+//  
+//  pushOnAstStack(caseBaseType);
+//}
+private void consumeOhlEnumCaseImplements() {
+  //TypeReference type = getTypeReference(0);
+  
+  ParameterizedQualifiedTypeReference caseBaseType = OhlSupport.makeEnumCaseBaseRefernce(
+      // Just any non-null stub
+      TypeReference.baseTypeReference(TypeIds.T_int, 0));
+  //ParameterizedQualifiedTypeReference caseBaseType = new ParameterizedQualifiedTypeReference(new char [][] {"".toCharArray()}, new TypeReference[1][], 0, new long [1]);
+  
+  pushOnAstStack(caseBaseType);
+  caseBaseType.ohlImplementsTag = "xx".toCharArray();
+}
+private void consumeOhlEnumCaseTypeConstantWithTag() {
+  char [] tag = identifierStack[identifierPtr--];
+
+  TypeReference type = getTypeReference(this.intStack[this.intPtr--]);
+  
+  FieldDeclaration fd = new FieldDeclaration();
+  fd.type = type;
+  fd.name = tag;
+  
+  pushOnAstStack(fd);
+}
+private void consumeOhlEnumCaseTypeConstant() {
+  TypeReference type = getTypeReference(this.intStack[this.intPtr--]);
+
+  FieldDeclaration fd = new FieldDeclaration();
+  fd.type = type;
+  fd.name = OhlSupport.NO_TAG_IDENTIFIER;
+  
+  pushOnAstStack(fd);
 }
 
 public static final char [] OHL_CASE_KEYWORD = "case".toCharArray();
@@ -6901,40 +6990,21 @@ private void consumeOhlCaseType() {
 	
 	// ignore position and put dim = 0
 	this.intStack[this.intPtr] = 0;
-	
-//	pushIdentifier();
-//	this.identifierStack[this.identifierPtr] = "Visitor".toCharArray();
-//	this.identifierLengthPtr--;
-//	this.identifierLengthStack[this.identifierLengthPtr] ++;
-//	
-//	pushOnGenericsLengthStack(0);
-//	pushOnGenericsIdentifiersLengthStack(this.identifierLengthStack[this.identifierLengthPtr]);
-//
-//	TypeReference enumCaseType = getTypeReference(0);
-//	
-//    // ru.spb.rybin.ohl.lang.EnumCaseBase<? super Visitor>
-//	char [][] tokens = {
-//      "ru".toCharArray(), 
-//      "spb".toCharArray(), 
-//      "rybin".toCharArray(), 
-//      "ohl".toCharArray(), 
-//      "lang".toCharArray(), 
-//      "EnumCaseBase".toCharArray()		    			
-//	};
-//	Wildcard wildcard = new Wildcard(Wildcard.SUPER);
-//	wildcard.bound = enumCaseType;
-//	TypeReference [][] typeArguments = {
-//		null,
-//		null,
-//		null,
-//		null,
-//		null,
-//		{ wildcard }
-//	};
-//	ParameterizedQualifiedTypeReference res = new ParameterizedQualifiedTypeReference(tokens, typeArguments, 0, new long [typeArguments.length]);
-//	
-//	pushOnAstStack(res);
 }
+private void consumeOhlCaseGenericType() {
+  pushIdentifier();
+  this.identifierStack[this.identifierPtr] = OHL_CASE_KEYWORD;
+//  this.identifierLengthPtr--;
+//  this.identifierLengthStack[this.identifierLengthPtr] ++;
+//  
+  this.genericsIdentifiersLengthStack[this.genericsIdentifiersLengthPtr]++;
+//  pushOnGenericsIdentifiersLengthStack(this.identifierLengthStack[this.identifierLengthPtr]);
+  pushOnGenericsLengthStack(0); // handle type arguments
+//  
+  // ignore position and put dim = 0
+  this.intStack[this.intPtr] = 0;
+}
+
 private void consumeOhlSwitchDefault() {
   int statementLen = astLengthStack[astLengthPtr--];
   
@@ -6947,7 +7017,7 @@ private void consumeOhlSwitchDefault() {
   
   Expression exp = null; // default
   CaseStatement caseSt = new CaseStatement(exp, sourceStart + 1, sourceStart);
-  caseSt.ohlIsOhlCase = true;
+  caseSt.ohlCaseType = CaseStatement.OHL_DEFAULT_CASE;
   
   int statementsLength = statementLen;
   
@@ -6975,7 +7045,93 @@ private void consumeOhlSwitchDefault() {
   concatNodeLists();
 }
 
-private void consumeOhlSwitchLabel() {
+private void consumeOhlSwitchTypeLabel() {
+  int statementLen = astLengthStack[astLengthPtr--];
+  
+  int firstStPos = astPtr - statementLen + 1;
+  int lastStPos = astPtr + 1;
+  astPtr = firstStPos - 1;
+  
+  int sourceStart = this.intStack[this.intPtr--];
+  int sourceEnd = this.endStatementPosition;
+
+  FieldDeclaration fd = (FieldDeclaration)this.astStack[this.astPtr--];
+
+  if (this.astLengthStack[this.astLengthPtr--] != 1) {
+    throw new RuntimeException("Expected 1 at ast length stack");
+  }
+  
+  
+  
+  Expression exp = new SingleNameReference("NULL".toCharArray(), 0);
+  CaseStatement caseSt = new CaseStatement(exp, sourceStart+1, sourceStart);
+  caseSt.ohlCaseType = CaseStatement.OHL_TYPE_CASE;
+  
+  Statement [] unpackSts = new Statement[1];
+  
+  char [] tempVarName = fd.name;
+  boolean varForceRedefine;
+  if (fd.name == OhlSupport.NO_TAG_IDENTIFIER) {
+    varForceRedefine = true;
+  } else {
+    varForceRedefine = false;
+  }
+  
+  {
+    // cast
+    CastExpression castExpression = new CastExpression(exp, OhlSupport.Cloner.clone(fd.type));
+    caseSt.ohlTodoCastExpression = castExpression;
+    
+    LocalDeclaration declaration = new LocalDeclaration(tempVarName, 0, 0);
+  // we want this var to be overridable cause it's name is not unique
+    declaration.ohlRedefineForCast = varForceRedefine;
+    caseSt.ohlTodoTempVarDeclaration = declaration;
+    declaration.type = fd.type;
+
+    declaration.initialization = castExpression;
+    
+    unpackSts[0] = declaration;
+  }
+
+  caseSt.ohlArgumentProto = new Argument[] {
+      new Argument("ignore_obj".toCharArray(), 0, fd.type, 0)
+  };
+
+  
+  int statementsLength = statementLen;
+  
+  Block block;
+  // ??
+  //int otherStsLength = this.realBlockStack[this.realBlockPtr--];
+  // some declarations are there
+  block = new Block(1);
+  System.arraycopy(
+      unpackSts, 
+      0, 
+      block.statements = new Statement[unpackSts.length + statementsLength], 
+      0, 
+      unpackSts.length ); 
+  System.arraycopy(
+    this.astStack, 
+    firstStPos, 
+    block.statements, 
+    unpackSts.length, 
+    statementsLength);
+  
+  block.sourceStart = sourceStart;
+  block.sourceEnd = sourceEnd;
+
+  BreakStatement breakSt = new BreakStatement(null, 0, 0);
+  breakSt.ohlSynthetic = true;
+  
+  pushOnAstStack(caseSt);
+  pushOnAstStack(block);
+  pushOnAstStack(breakSt);
+  concatNodeLists();
+  concatNodeLists();
+}
+
+private void consumeOhlSwitchStructLabel() {
 	int statementLen = astLengthStack[astLengthPtr--];
 	
 	int firstStPos = astPtr - statementLen + 1;
@@ -6994,7 +7150,7 @@ private void consumeOhlSwitchLabel() {
 
   Expression exp = new SingleNameReference("NULL".toCharArray(), 0);
 	CaseStatement caseSt = new CaseStatement(exp, sourceStart+1, sourceStart);
-	caseSt.ohlIsOhlCase = true;
+	caseSt.ohlCaseType = CaseStatement.OHL_STRUCT_CASE;
 	
 	char[] selector = this.identifierStack[this.identifierPtr];
 	caseSt.ohlSelector = selector;
@@ -7077,7 +7233,7 @@ private void consumeOhlSwitchLabel() {
 	concatNodeLists();
 	concatNodeLists();
 }
-private void consumeOhlEnumCaseConstantHeaderRightParen() {
+private void consumeOhlEnumCaseStructConstantHeaderRightParen() {
 	// MethodHeaderParameters ::= FormalParameterListopt ')'
 	int length = this.astLengthStack[this.astLengthPtr--];
 	this.astPtr -= length;
@@ -7110,7 +7266,7 @@ private void consumeOhlEnumCaseConstantHeaderRightParen() {
 		}	
 	}	
 }
-private void consumeOhlEnumCaseConstant() {
+private void consumeOhlEnumCaseStructConstant() {
 	//int endOfEnumConstant = intStack[intPtr--];
 	final AbstractMethodDeclaration  md = (AbstractMethodDeclaration ) this.astStack[this.astPtr];
 	//md.declarationEnd = md.declarationSourceStart;
@@ -7119,7 +7275,7 @@ private void consumeOhlEnumCaseConstant() {
 	md.bodyEnd = md.declarationSourceStart;
 }
 
-private void consumeOhlEnumCaseConstantHeader() {
+private void consumeOhlEnumCaseStructConstantHeader() {
 	AbstractMethodDeclaration method = (AbstractMethodDeclaration)this.astStack[this.astPtr];
 
 	if (this.currentToken == TokenNameLBRACE){ 
@@ -7151,6 +7307,54 @@ private void consumeOhlEnumCaseConstantHeader() {
 	}		
 }
 
+private void consumeOhlEnumCaseConstantHeaderNameWithTag() {
+  MethodDeclaration md = new MethodDeclaration(this.compilationUnit.compilationResult);
+
+  //name
+  md.selector = this.identifierStack[this.identifierPtr];
+  long selectorSource = this.identifierPositionStack[this.identifierPtr--];
+  this.identifierLengthPtr--;
+    // //type
+    // md.returnType = getTypeReference(this.intStack[this.intPtr--]);
+  //modifiers
+  md.declarationSourceStart = this.intStack[this.intPtr--];
+  //md.modifiers = this.intStack[this.intPtr--];
+  // consume annotations
+//  int length;
+//  if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
+//    System.arraycopy(
+//      this.expressionStack, 
+//      (this.expressionPtr -= length) + 1, 
+//      md.annotations = new Annotation[length], 
+//      0, 
+//      length); 
+//  }
+  // javadoc
+  md.javadoc = this.javadoc;
+  this.javadoc = null;
+
+  //highlight starts at selector start
+  md.sourceStart = (int) (selectorSource >>> 32);
+  pushOnAstStack(md);
+  md.sourceEnd = this.lParenPos;
+  md.bodyStart = this.lParenPos+1;
+  this.listLength = 0; // initialize this.listLength before reading parameters/throws
+  
+  // recovery
+  if (this.currentElement != null){
+    if (this.currentElement instanceof RecoveredType 
+      //|| md.modifiers != 0
+      || (Util.getLineNumber(md.returnType.sourceStart, this.scanner.lineEnds, 0, this.scanner.linePtr)
+          == Util.getLineNumber(md.sourceStart, this.scanner.lineEnds, 0, this.scanner.linePtr))){
+      this.lastCheckPoint = md.bodyStart;
+      this.currentElement = this.currentElement.add(md, 0);
+      this.lastIgnoredToken = -1;
+    } else {
+      this.lastCheckPoint = md.sourceStart;
+      this.restartRecovery = true;
+    }
+  }   
+}
 private void consumeOhlEnumCaseConstantHeaderName() {
 	// MethodHeaderName ::= Modifiersopt Type 'Identifier' '('
 	// AnnotationMethodHeaderName ::= Modifiersopt Type 'Identifier' '('
@@ -7158,30 +7362,29 @@ private void consumeOhlEnumCaseConstantHeaderName() {
 	MethodDeclaration md = new MethodDeclaration(this.compilationUnit.compilationResult);
 
 	//name
-	md.selector = this.identifierStack[this.identifierPtr];
-	long selectorSource = this.identifierPositionStack[this.identifierPtr--];
-	this.identifierLengthPtr--;
+	md.selector = OhlSupport.NO_TAG_IDENTIFIER;
     // //type
     // md.returnType = getTypeReference(this.intStack[this.intPtr--]);
 	//modifiers
 	md.declarationSourceStart = this.intStack[this.intPtr--];
-	md.modifiers = this.intStack[this.intPtr--];
+	//md.modifiers = this.intStack[this.intPtr--];
 	// consume annotations
-	int length;
-	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
-		System.arraycopy(
-			this.expressionStack, 
-			(this.expressionPtr -= length) + 1, 
-			md.annotations = new Annotation[length], 
-			0, 
-			length); 
-	}
+//	int length;
+//	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
+//		System.arraycopy(
+//			this.expressionStack, 
+//			(this.expressionPtr -= length) + 1, 
+//			md.annotations = new Annotation[length], 
+//			0, 
+//			length); 
+//	}
 	// javadoc
 	md.javadoc = this.javadoc;
 	this.javadoc = null;
 
 	//highlight starts at selector start
-	md.sourceStart = (int) (selectorSource >>> 32);
+  md.sourceStart = 0;
+  //md.sourceStart = (int) (selectorSource >>> 32);
 	pushOnAstStack(md);
 	md.sourceEnd = this.lParenPos;
 	md.bodyStart = this.lParenPos+1;
@@ -7260,82 +7463,25 @@ private void consumeOhlEnumCaseBodyWithConstants() {
 	//concatNodeLists();
 }
 private void consumeOhlEnumCaseHeaderNameWithTypeParameters() {
-	// EnumHeaderNameWithTypeParameters ::= Modifiersopt 'enum' Identifier TypeParameters
-	TypeDeclaration enumDeclaration = new TypeDeclaration(this.compilationUnit.compilationResult);
-	// consume type parameters
-	int length = this.genericsLengthStack[this.genericsLengthPtr--];
-	this.genericsPtr -= length;
-	System.arraycopy(this.genericsStack, this.genericsPtr + 1, enumDeclaration.typeParameters = new TypeParameter[length], 0, length);
+  // ClassHeaderName ::= ClassHeaderName1 TypeParameters
+  // InterfaceHeaderName ::= InterfaceHeaderName1 TypeParameters
+  TypeDeclaration typeDecl = (TypeDeclaration)this.astStack[this.astPtr];
 
-	this.problemReporter().invalidUsageOfTypeParametersForEnumDeclaration(enumDeclaration);
+  // consume type parameters
+  int length = this.genericsLengthStack[this.genericsLengthPtr--];
+  this.genericsPtr -= length;
+  System.arraycopy(this.genericsStack, this.genericsPtr + 1, typeDecl.typeParameters = new TypeParameter[length], 0, length);
 
-	enumDeclaration.bodyStart = enumDeclaration.typeParameters[length-1].declarationSourceEnd + 1;
-	
-//	enumDeclaration.typeParameters = null;
-
-	this.listTypeParameterLength = 0;
-
-	if (this.nestedMethod[this.nestedType] == 0) {
-		if (this.nestedType != 0) {
-			enumDeclaration.bits |= ASTNode.IsMemberType;
-		}		
-	} else {
-		// Record that the block has a declaration for local types
-//		markEnclosingMemberWithLocalType();
-		blockReal();
-	}
-	//highlight the name of the type
-	long pos = this.identifierPositionStack[this.identifierPtr];
-	enumDeclaration.sourceEnd = (int) pos;
-	enumDeclaration.sourceStart = (int) (pos >>> 32);
-	enumDeclaration.name = this.identifierStack[this.identifierPtr--];
-	this.identifierLengthPtr--;
-
-	//compute the declaration source too
-	// 'class' and 'interface' push two int positions: the beginning of the class token and its end.
-	// we want to keep the beginning position but get rid of the end position
-	// it is only used for the ClassLiteralAccess positions.
-	enumDeclaration.declarationSourceStart = this.intStack[this.intPtr--]; 
-	this.intPtr--; // remove the end position of the class token
-
-	enumDeclaration.modifiersSourceStart = this.intStack[this.intPtr--];
-	enumDeclaration.modifiers = this.intStack[this.intPtr--] | ClassFileConstants.AccEnum;
-	if (enumDeclaration.modifiersSourceStart >= 0) {
-		enumDeclaration.declarationSourceStart = enumDeclaration.modifiersSourceStart;
-	}
-	// consume annotations
-	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
-		System.arraycopy(
-			this.expressionStack, 
-			(this.expressionPtr -= length) + 1, 
-			enumDeclaration.annotations = new Annotation[length], 
-			0, 
-			length); 
-	}
-//	if (this.currentToken == TokenNameLBRACE) { 
-//		enumDeclaration.bodyStart = this.scanner.currentPosition;
-//	}
-	enumDeclaration.bodyStart = enumDeclaration.sourceEnd + 1;
-	pushOnAstStack(enumDeclaration);
-
-	this.listLength = 0; // will be updated when reading super-interfaces
-	
-	if(!this.statementRecoveryActivated &&
-			options.sourceLevel < ClassFileConstants.JDK1_5 &&
-			this.lastErrorEndPositionBeforeRecovery < this.scanner.currentPosition) {
-		//TODO this code will be never run while 'enum' is an identifier in 1.3 scanner 
-		this.problemReporter().invalidUsageOfEnumDeclarations(enumDeclaration);
-	}
-	
-	// recovery
-	if (this.currentElement != null){ 
-		this.lastCheckPoint = enumDeclaration.bodyStart;
-		this.currentElement = this.currentElement.add(enumDeclaration, 0);
-		this.lastIgnoredToken = -1;
-	}
-	// javadoc
-	enumDeclaration.javadoc = this.javadoc;
-	this.javadoc = null;
+  typeDecl.bodyStart = typeDecl.typeParameters[length-1].declarationSourceEnd + 1;
+  
+  this.listTypeParameterLength = 0;
+  
+  if (this.currentElement != null) { // is recovering
+    RecoveredType recoveredType = (RecoveredType) this.currentElement;
+    recoveredType.pendingTypeParameters = null;
+    
+    this.lastCheckPoint = typeDecl.bodyStart;
+  }
 }
 private void consumeOhlEnumCaseHeaderName() {
 	// EnumHeaderName ::= Modifiersopt 'enum' Identifier
@@ -9284,7 +9430,24 @@ protected TypeReference getTypeReference(int dim) {
 	return ref;
 }
 
-
+public static QualifiedTypeReference ohlBuildCaseReference(TypeReference classifierRefefence) {
+  TypeReference visitorRef = OhlSupport.convertToMemberType(classifierRefefence,
+      OhlSupport.VISITOR_INTERFACE_NAME.toCharArray(), true);
+  
+  char [][] tokens2 = OhlSupport.ENUM_CASE_BASE_TOKENS;
+  Wildcard wildcard = new Wildcard(Wildcard.SUPER);
+  wildcard.bound = visitorRef;
+  TypeReference [][] typeArguments = {
+    null,
+    null,
+    null,
+    null,
+    null,
+    { wildcard }
+  };
+  ParameterizedQualifiedTypeReference res = new ParameterizedQualifiedTypeReference(tokens2, typeArguments, 0, new long [typeArguments.length]);
+  return res;
+}
 public static QualifiedTypeReference ohlConvertCaseReference(QualifiedTypeReference qualifiedTypeReference) {
 	char[][] tokens1 = qualifiedTypeReference.tokens;
 	if (tokens1[tokens1.length-1] != Parser.OHL_CASE_KEYWORD) {
@@ -9293,14 +9456,7 @@ public static QualifiedTypeReference ohlConvertCaseReference(QualifiedTypeRefere
 	tokens1[tokens1.length-1] = "Visitor".toCharArray();
     // ru.spb.rybin.ohl.lang.EnumCaseBase<? super Visitor>
 	
-	char [][] tokens2 = {
-      "ru".toCharArray(), 
-      "spb".toCharArray(), 
-      "rybin".toCharArray(), 
-      "ohl".toCharArray(), 
-      "lang".toCharArray(), 
-      "EnumCaseBase".toCharArray()		    			
-	};
+	char [][] tokens2 = OhlSupport.ENUM_CASE_BASE_TOKENS;
 	Wildcard wildcard = new Wildcard(Wildcard.SUPER);
 	wildcard.bound = qualifiedTypeReference;
 	TypeReference [][] typeArguments = {
@@ -9313,6 +9469,31 @@ public static QualifiedTypeReference ohlConvertCaseReference(QualifiedTypeRefere
 	};
 	ParameterizedQualifiedTypeReference res = new ParameterizedQualifiedTypeReference(tokens2, typeArguments, 0, new long [typeArguments.length]);
 	return res;
+}
+public static ParameterizedQualifiedTypeReference ohlConvertCaseReference(ParameterizedQualifiedTypeReference typeReference) {
+  char[][] tokens1 = typeReference.tokens;
+  if (tokens1[tokens1.length-1] != Parser.OHL_CASE_KEYWORD) {
+    return typeReference;
+  }
+  tokens1[tokens1.length-1] = OhlSupport.VISITOR_INTERFACE_NAME.toCharArray();
+    // ru.spb.rybin.ohl.lang.EnumCaseBase<? super Visitor>
+  TypeReference[][] typeArguments1 = typeReference.typeArguments;
+  typeArguments1[typeArguments1.length-1] = typeArguments1[typeArguments1.length-2];
+  typeArguments1[typeArguments1.length-2] = null;
+  
+  char [][] tokens2 = OhlSupport.ENUM_CASE_BASE_TOKENS;
+  Wildcard wildcard = new Wildcard(Wildcard.SUPER);
+  wildcard.bound = typeReference;
+  TypeReference [][] typeArguments = {
+    null,
+    null,
+    null,
+    null,
+    null,
+    { wildcard }
+  };
+  ParameterizedQualifiedTypeReference res = new ParameterizedQualifiedTypeReference(tokens2, typeArguments, 0, new long [typeArguments.length]);
+  return res;
 }
 
 
@@ -9360,6 +9541,7 @@ protected TypeReference getTypeReferenceForGenericType(int dim, int identifierLe
 		if (dim != 0) {
 			parameterizedQualifiedTypeReference.sourceEnd = this.endStatementPosition;
 		}
+		parameterizedQualifiedTypeReference = ohlConvertCaseReference(parameterizedQualifiedTypeReference);
 		return parameterizedQualifiedTypeReference;
 	}
 }

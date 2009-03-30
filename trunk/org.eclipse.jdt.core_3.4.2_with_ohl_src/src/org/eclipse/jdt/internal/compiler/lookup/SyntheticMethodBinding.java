@@ -34,6 +34,7 @@ public class SyntheticMethodBinding extends MethodBinding {
 	public final static int EnumValueOf = 8; // enum #valueOf(String)
 	public final static int SwitchTable = 9; // switch table method
   public final static int OhlReturn0 = 10; // switch table method
+  public final static int OhlReturnThis = 11; // switch table method
 
 	public int sourceStart = 0; // start position of the matching declaration
 	public int index; // used for sorting access methods in the class file
@@ -253,6 +254,34 @@ public class SyntheticMethodBinding extends MethodBinding {
       this.thrownExceptions = overridenMethodToBridge.thrownExceptions;
       this.targetMethod = null;
       this.purpose = SyntheticMethodBinding.OhlReturn0;
+    SyntheticMethodBinding[] knownAccessMethods = declaringClass.syntheticMethods();
+    int methodId = knownAccessMethods == null ? 0 : knownAccessMethods.length;
+    this.index = methodId;      
+  }
+
+  /**
+   * Construct an OHL return this method
+   */
+  public SyntheticMethodBinding(MethodBinding overridenMethodToBridge, int returnValueFakeParam, SourceTypeBinding declaringClass, MethodBinding visitMethod) {
+    
+    if (visitMethod == null) {
+      throw new RuntimeException("target method should've been set");
+    }
+      this.declaringClass = declaringClass;
+      this.selector = overridenMethodToBridge.selector;
+      // amongst other, clear the AccGenericSignature, so as to ensure no remains of original inherited persist (101794)
+      // also use the modifiers from the target method, as opposed to inherited one (147690)
+      this.modifiers = (ClassFileConstants.AccPublic 
+          //| ClassFileConstants.AccBridge | ClassFileConstants.AccSynthetic
+          )
+          //& ~(ClassFileConstants.AccAbstract | ClassFileConstants.AccNative  | ClassFileConstants.AccFinal | ExtraCompilerModifiers.AccGenericSignature)
+          ;
+    this.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
+      this.returnType = overridenMethodToBridge.returnType;
+      this.parameters = overridenMethodToBridge.parameters;
+      this.thrownExceptions = overridenMethodToBridge.thrownExceptions;
+      this.targetMethod = visitMethod;
+      this.purpose = SyntheticMethodBinding.OhlReturnThis;
     SyntheticMethodBinding[] knownAccessMethods = declaringClass.syntheticMethods();
     int methodId = knownAccessMethods == null ? 0 : knownAccessMethods.length;
     this.index = methodId;      

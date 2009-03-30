@@ -46,7 +46,8 @@ public class SwitchStatement extends Statement {
 	// for local variables table attributes
 	int preSwitchInitStateIndex = -1;
 	int mergedInitStateIndex = -1;
-	public Block[] ohlCaseBlocks;
+  public CaseStatement[] ohlCaseStatements;
+  public Block[] ohlCaseBlocks;
   public boolean ohlHasExplicitDefault;
 
 	public FlowInfo analyseCode(
