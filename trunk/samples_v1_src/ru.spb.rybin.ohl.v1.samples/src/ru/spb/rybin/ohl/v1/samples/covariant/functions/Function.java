@@ -1,4 +1,4 @@
-package ru.spb.rybin.ohl.v1.samples.covariant.functions;
+package ru.spb.rybin.ohl.v2.samples.covariant.functions;
 
 public interface Function extends GeneralizedFunction {
   @Override // note, this is a covariant return type
