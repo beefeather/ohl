@@ -1,4 +1,4 @@
-package ru.spb.rybin.ohl.v1.samples.expressionparser;
+package ru.spb.rybin.ohl.v2.samples.expressionparser;
 
 public class Parser {
   public Parser(Lexer lexer) {
@@ -10,14 +10,14 @@ public class Parser {
   }
   private AstNode parseExpression() throws ParserException {
 	  final AstNode left = parseTerminal();
-	  final boolean plusNotMinus;
+	  final AstBinaryOperation.Operation.case operation;
 
 	  switch (lexer.peek()) {
   	  case * plus() {
-  		  plusNotMinus = true;
+  	    operation = AstBinaryOperation.Operation.plus();
   	  }
   	  case * minus() {
-  		  plusNotMinus = false;
+        operation = AstBinaryOperation.Operation.minus();
   	  }
   	  default * {
   		  return left;
@@ -33,12 +33,12 @@ public class Parser {
   	  public AstNode getRight() {
   			return right;
   		}		  
-      public AstType.case getSubtype() {
-      	if (plusNotMinus) {
-      		return AstType.addition(this);
-      	} else {
-      		return AstType.subtraction(this);
-      	}
+  	  @Override
+  	  public AstType.case getSubtype() {
+  	    return this;
+  	  }
+      public Operation.case getOperation() {
+        return operation;
       }
 	  };
   }
@@ -61,7 +61,7 @@ public class Parser {
   				  return value;
   			  }
 		      public AstType.case getSubtype() {
-    		    return AstType.constant(this);
+    		    return this;
 		      }
   		  };
   	  }
@@ -72,7 +72,7 @@ public class Parser {
   				  return name;
   			  }
 		      public AstType.case getSubtype() {
-    		    return AstType.variable(this);
+            return this;
 		      }
   		  };
   	  }
