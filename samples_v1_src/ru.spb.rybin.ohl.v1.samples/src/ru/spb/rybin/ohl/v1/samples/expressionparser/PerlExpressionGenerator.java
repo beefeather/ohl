@@ -1,23 +1,25 @@
-package ru.spb.rybin.ohl.v1.samples.expressionparser;
+package ru.spb.rybin.ohl.v2.samples.expressionparser;
 
 public class PerlExpressionGenerator {
   public static void generate(AstNode node, StringBuilder output) {
 	  output.append('(');
 	  switch (node.getSubtype()) {
-  	  case * addition(AstBinaryOperation addition) {
-  		  generate(addition.getLeft(), output);
-  		  output.append(" + ");
-  		  generate(addition.getRight(), output);
+  	  case instanceof AstBinaryOperation binary {
+        generate(binary.getLeft(), output);
+  	    switch (binary.getOperation()) {
+          case * plus() {
+            output.append(" + ");
+          }
+          case * minus() {
+            output.append(" - ");
+          }
+  	    }
+  		  generate(binary.getRight(), output);
   	  }
-  	  case * subtraction(AstBinaryOperation subtration) {
-  		  generate(subtration.getLeft(), output);
-  		  output.append(" - ");
-  		  generate(subtration.getRight(), output);
-  	  }
-  	  case * constant(AstConstant constant) {
+  	  case instanceof AstConstant constant {
   		  output.append(Integer.toString(constant.getValue()));
   	  }
-  	  case * variable(AstVariable variable) {
+  	  case instanceof AstVariable variable {
   		  output.append("$" + variable.getName());  
   	  }
 	  }

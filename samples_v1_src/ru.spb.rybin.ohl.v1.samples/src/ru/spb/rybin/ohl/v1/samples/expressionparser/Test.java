@@ -1,12 +1,12 @@
-package ru.spb.rybin.ohl.v1.samples.expressionparser;
+package ru.spb.rybin.ohl.v2.samples.expressionparser;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import ru.spb.rybin.ohl.lang.EnumCaseBase;
-import ru.spb.rybin.ohl.v1.samples.expressionparser.Lexer.Tokens.Visitor;
-import ru.spb.rybin.ohl.v1.samples.expressionparser.Parser.ParserException;
+import ru.spb.rybin.ohl.v2.samples.expressionparser.Lexer.Tokens.Visitor;
+import ru.spb.rybin.ohl.v2.samples.expressionparser.Parser.ParserException;
 
 public class Test {
 	public static void main(String[] args) throws ParserException {

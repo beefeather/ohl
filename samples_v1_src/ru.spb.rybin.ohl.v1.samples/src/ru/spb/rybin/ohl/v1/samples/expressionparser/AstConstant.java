@@ -1,5 +1,5 @@
-package ru.spb.rybin.ohl.v1.samples.expressionparser;
+package ru.spb.rybin.ohl.v2.samples.expressionparser;
 
-public interface AstConstant extends AstNode {
+public interface AstConstant extends AstNode, case {
   int getValue();
 }
