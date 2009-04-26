@@ -171,14 +171,17 @@ public class Block extends Statement {
           } break;
           case CaseStatement.OHL_STRUCT_CASE: {
             char[] selector = ((SingleTypeReference)decl1.type).token;
-            QualifiedTypeReference [] typeRefCopies = new QualifiedTypeReference[3];
+            TypeReference [] typeRefCopies = new TypeReference[3];
+            QualifiedTypeReference typeRef = (QualifiedTypeReference) binding2typeRef(visitorType);
             for (int j=0; j<typeRefCopies.length; j++) {
-              QualifiedTypeReference typeRef = (QualifiedTypeReference) binding2typeRef(visitorType);
               QualifiedTypeReference memberType = (QualifiedTypeReference) OhlSupport.convertToMemberType(typeRef, selector, true);
-              
-              char [] [] tokens = memberType.tokens;
-              tokens[tokens.length-2] = OhlSupport.CASE_HOLDER_INTERFACE_NAME.toCharArray();
-              typeRefCopies[j] = memberType;
+              if (memberType == null) {
+                typeRefCopies[j] = new SingleTypeReference("<unspecified>".toCharArray(), 0);
+              } else {
+                char [] [] tokens = memberType.tokens;
+                tokens[tokens.length-2] = OhlSupport.CASE_HOLDER_INTERFACE_NAME.toCharArray();
+                typeRefCopies[j] = memberType;
+              }
             }
             decl1.type = typeRefCopies[0];
             ((CastExpression)decl1.initialization).type = typeRefCopies[1];
@@ -245,13 +248,17 @@ public class Block extends Statement {
 		if (typeBinding instanceof ParameterizedTypeBinding) {
 			ParameterizedTypeBinding genericType = (ParameterizedTypeBinding)typeBinding;
 			TypeReference [] [] genericParams = new TypeReference[tokens.length][];
-			TypeReference [] lastComponentParams = new TypeReference[genericType.arguments.length];
-			genericParams[genericParams.length-1] = lastComponentParams;
-			
-			for (int i=0; i<lastComponentParams.length; i++) {
-				lastComponentParams[i] = binding2typeRef(genericType.arguments[i]);
+			TypeReference [] lastComponentParams;
+			if (genericType.arguments == null) {
+			  lastComponentParams = null;
+			} else {
+			  lastComponentParams = new TypeReference[genericType.arguments.length];
+	      for (int i=0; i<lastComponentParams.length; i++) {
+	        lastComponentParams[i] = binding2typeRef(genericType.arguments[i]);
+	      }
 			}
 			
+      genericParams[genericParams.length-1] = lastComponentParams;
 			ParameterizedQualifiedTypeReference res = 
 				new ParameterizedQualifiedTypeReference(tokens, genericParams, 0, pos);
 			return res;

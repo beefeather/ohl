@@ -3361,6 +3361,8 @@ protected void consumeEnumDeclaration() {
 	}
 
 	enumDeclaration.declarationSourceEnd = flushCommentsDefinedPriorTo(this.endStatementPosition); 
+  
+  OhlSupport.addVisitorToClassifier(enumDeclaration);
 }
 protected void consumeEnumDeclarations() {
 	// Do nothing by default

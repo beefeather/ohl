@@ -137,7 +137,6 @@ void checkAbstractMethod(MethodBinding abstractMethod) {
 		  TypeBinding arg1 = abstractMethod.parameters[0];
 		  if (arg1 instanceof ReferenceBinding) {
 		    ReferenceBinding argRefBinding = (ReferenceBinding) arg1;
-        String tagName = null; 
         InvocationSite invocationSite = new InvocationSite() {
           public TypeBinding[] genericTypeArguments() {
             return null;
@@ -161,7 +160,7 @@ void checkAbstractMethod(MethodBinding abstractMethod) {
             return 0;
           }
         };
-		    String methodSelector = OhlSupport.VISITOR_TYPE_METHOD_PREFIX + tagName;
+		    String methodSelector = OhlSupport.VISITOR_TYPE_METHOD_PREFIX;
 		      
         MethodBinding exactMethod = this.type.scope.getMethod(argRefBinding, methodSelector.toCharArray(),
             new TypeBinding[] { this.type }, invocationSite);
