@@ -1,5 +1,5 @@
-package ru.spb.rybin.ohl.v1.samples.covariant.functions;
+package ru.spb.rybin.ohl.v2.samples.covariant.functions;
 
-public interface SingularValue {
+public interface SingularValue extends case {
   // something interesting should go here
 }
