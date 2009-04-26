@@ -15,6 +15,7 @@ import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.*;
+import org.eclipse.jdt.internal.compiler.parser.OhlSupport;
 
 /**
  * Syntactic representation of a reference to a generic type.
@@ -193,8 +194,37 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 			if (((ClassScope) scope).detectHierarchyCycle(currentErasure, this))
 				return null;
 		}
-
+		
 		TypeVariableBinding[] typeVariables = currentErasure.typeVariables();
+
+		// OHL
+		if (typeVariables.length >= 2) {
+		  TypeVariableBinding ohlVar = typeVariables[typeVariables.length-2];
+		  if (CharOperation.equals(ohlVar.sourceName, OhlSupport.T_OHL_NAME)) {
+	      TypeVariableBinding ohlVar2 = typeVariables[typeVariables.length-1];
+	      TypeBinding type = ohlVar2.firstBound;
+	      if (type != null) {
+	        TypeReference[] oldArgs = this.typeArguments;
+	        this.typeArguments = new TypeReference[argLength + 2];
+	        TypeBinding[] oldArgTypes = argTypes;
+	        argTypes = new TypeBinding[argLength + 2];
+          System.arraycopy(oldArgs, 0, this.typeArguments, 0, argLength);
+          System.arraycopy(oldArgTypes, 0, argTypes, 0, argLength);
+          TypeReference boundType = new SingleTypeReference("autofilled type".toCharArray(), 0);
+          Wildcard newType = new Wildcard(Wildcard.SUPER);
+	        newType.bound = boundType;
+	        boundType.resolvedType = type;
+          this.typeArguments[argLength] = newType;
+          int windcardResolved = 
+          argTypes[argLength] = ;
+          
+          this.typeArguments[argLength+1] = boundType;
+          argTypes[argLength+1] = type;
+          argLength += 2;
+		    }
+		  }
+		}
+
 		if (typeVariables == Binding.NO_TYPE_VARIABLES) { // non generic invoked with arguments
 			boolean isCompliant15 = scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_5;
 			if ((currentErasure.tagBits & TagBits.HasMissingType) == 0) {

@@ -3199,6 +3199,11 @@ class ASTConverter {
 								end = type2.getStartPosition() + type2.getLength() - 1;
 							}
 							end = retrieveClosingAngleBracketPosition(end + 1);
+							
+							// OHL
+							if (end < sourceStart) {
+							  end = sourceStart + 1;
+							}
 							type.setSourceRange(sourceStart, end - sourceStart + 1);
 						} else {
 							type.setSourceRange(sourceStart, end - sourceStart + 1);

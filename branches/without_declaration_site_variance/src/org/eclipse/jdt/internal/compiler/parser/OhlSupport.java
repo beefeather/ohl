@@ -28,7 +28,6 @@ import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.ast.SingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
-import org.eclipse.jdt.internal.compiler.ast.StringLiteral;
 import org.eclipse.jdt.internal.compiler.ast.SwitchStatement;
 import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.jdt.internal.compiler.ast.ThrowStatement;
@@ -667,6 +666,9 @@ public class OhlSupport {
 
 	
 	public static TypeReference convertToMemberType(TypeReference refOrig, char [] memberName, boolean keepGenerics) {
+	  if (refOrig == null) {
+	    return null;
+	  }
 		TypeReference res;
 		if (refOrig instanceof SingleTypeReference) {
 			char[][] sources = new char [] [] {
@@ -743,6 +745,7 @@ public class OhlSupport {
 	
   static final int CASE_CODES_START = 2;
   public static final char[] IMPLEMENTS_TAG_FIELD_NAME = "ohl_name_tag".toCharArray();
+  public static final char[] T_OHL_NAME = "T_OHL".toCharArray();
   
   static class Cloner {
 
