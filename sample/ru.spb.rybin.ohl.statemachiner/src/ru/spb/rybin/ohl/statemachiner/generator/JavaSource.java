@@ -26,26 +26,43 @@ class JavaSource {
   }
   
   void println(String line) {
+    if (mayAppend) {
+      throw new IllegalStateException();
+    }
     for (int i = 0; i < currentIndent; i++) {
       output.print("  ");
     }
     output.println(line);
+    mayAppend = false;
   }
   public void endline(String line) {
+    if (!mayAppend) {
+      throw new IllegalStateException();
+    }
     output.println(line);
+    mayAppend = false;
   }
 
   public void print(String line) {
+    if (mayAppend) {
+      throw new IllegalStateException();
+    }
     for (int i = 0; i < currentIndent; i++) {
       output.print("  ");
     }
     output.print(line);
+    mayAppend = true;
   }
   
   public void append(String line) {
+    if (!mayAppend) {
+      throw new IllegalStateException();
+    }
     output.print(line);
+    mayAppend = true;
   }
   
   private int currentIndent = 0;
+  boolean mayAppend = false;
   private final PrintWriter output;
 }

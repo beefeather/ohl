@@ -25,13 +25,13 @@ class Analyze {
       }
       void reach(StateOnSide st, Edge edge) {
         boolean res = visited.add(st);
-        if (res) {
-          if (st.getSide() == side) {
-            if (edge == null) {
-              throw new RuntimeException("Should have come here by edge");
-            }
-            result.add(edge);
-          } else {
+        if (st.getSide() == side) {
+          if (edge == null) {
+            throw new RuntimeException("Should have come here by edge");
+          }
+          result.add(edge);
+        } else {
+          if (res) {
             next(st);
           }
         }
