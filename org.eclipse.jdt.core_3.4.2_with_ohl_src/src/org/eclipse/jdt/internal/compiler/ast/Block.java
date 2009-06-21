@@ -248,13 +248,14 @@ public class Block extends Statement {
 		if (typeBinding instanceof ParameterizedTypeBinding) {
 			ParameterizedTypeBinding genericType = (ParameterizedTypeBinding)typeBinding;
 			TypeReference [] [] genericParams = new TypeReference[tokens.length][];
-			TypeReference [] lastComponentParams = new TypeReference[genericType.arguments.length];
-			genericParams[genericParams.length-1] = lastComponentParams;
-			
-			for (int i=0; i<lastComponentParams.length; i++) {
-				lastComponentParams[i] = binding2typeRef(genericType.arguments[i]);
+			if (genericType.arguments != null) {
+  			TypeReference [] lastComponentParams = new TypeReference[genericType.arguments.length];
+  			genericParams[genericParams.length-1] = lastComponentParams;
+  			
+  			for (int i=0; i<lastComponentParams.length; i++) {
+  				lastComponentParams[i] = binding2typeRef(genericType.arguments[i]);
+  			}
 			}
-			
 			ParameterizedQualifiedTypeReference res = 
 				new ParameterizedQualifiedTypeReference(tokens, genericParams, 0, pos);
 			return res;
