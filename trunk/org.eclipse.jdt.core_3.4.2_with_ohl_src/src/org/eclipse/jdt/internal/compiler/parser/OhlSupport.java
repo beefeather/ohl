@@ -10,6 +10,7 @@ import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.Assignment;
 import org.eclipse.jdt.internal.compiler.ast.Block;
 import org.eclipse.jdt.internal.compiler.ast.CaseStatement;
+import org.eclipse.jdt.internal.compiler.ast.ClassLiteralAccess;
 import org.eclipse.jdt.internal.compiler.ast.ConstructorDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
@@ -110,7 +111,6 @@ public class OhlSupport {
               size2++;
             }
           }
-          enumDeclaration.fields = null;
         }
       }
 		}
@@ -428,6 +428,9 @@ public class OhlSupport {
 
     enumDeclaration.memberTypes = new TypeDeclaration [] { caseHolderDeclaration, visitorDeclaration } ;
     
+    enumDeclaration.fields = new FieldDeclaration [] {
+        createOhlClassField(enumDeclaration.name)
+    };
 		
 //		
 //		{
@@ -459,6 +462,27 @@ public class OhlSupport {
 //		}
 //		
 	}
+  
+  static FieldDeclaration createOhlClassField(char[] classShortName) {
+    FieldDeclaration field = new FieldDeclaration(OHL_CLASS_FIELD_NAME, 0, 1);
+    field.modifiers |= ClassFileConstants.AccPublic | ClassFileConstants.AccFinal | ClassFileConstants.AccStatic;
+    field.type = createOhlClassTypeReference(classShortName);
+    
+    AllocationExpression initializer = new AllocationExpression();
+    initializer.type = createOhlClassTypeReference(classShortName);
+    ClassLiteralAccess literal = new ClassLiteralAccess(0, new SingleTypeReference(VISITOR_INTERFACE_NAME.toCharArray(), 0));
+    initializer.arguments = new Expression[] { literal };
+    field.initialization = initializer;
+    return field;
+  }
+  
+  static TypeReference createOhlClassTypeReference(char[] classShortName) {
+    TypeReference [][] typeArguments = new TypeReference [OHL_CLASS_TOKENS.length][];
+    TypeReference visitorReference = new QualifiedTypeReference(new char[][] { classShortName, VISITOR_INTERFACE_NAME.toCharArray() },
+                                                                new long[2]);
+    typeArguments[OHL_CLASS_TOKENS.length-1] = new TypeReference[] { visitorReference };
+    return new ParameterizedQualifiedTypeReference(OHL_CLASS_TOKENS, typeArguments, 0, new long[OHL_CLASS_TOKENS.length]);
+  }
 
   static ParameterizedQualifiedTypeReference makeEnumCaseBaseRefernce(TypeReference visitorRef) {
     TypeReference [][] typeArguments = new TypeReference [ENUM_CASE_BASE_TOKENS.length][];
@@ -722,6 +746,8 @@ public class OhlSupport {
             newPos
             );
 		  }
+		} else if (refOrig == null) {
+		  return null;
 		} else {
 			throw new RuntimeException();
 		}
@@ -737,12 +763,21 @@ public class OhlSupport {
       "lang".toCharArray(), 
       "EnumCaseBase".toCharArray()              
   };
+  public static final char [][] OHL_CLASS_TOKENS = {
+    "ru".toCharArray(), 
+    "spb".toCharArray(), 
+    "rybin".toCharArray(), 
+    "ohl".toCharArray(), 
+    "lang".toCharArray(), 
+    "OhlClass".toCharArray()              
+};
 	public static final String CASE_HOLDER_INTERFACE_NAME = "C";
   public static final String SINGLETON_FIELD_NAME = "instance";
   public static final char[] ACCEPT_METHOD_SELECTOR = "accept".toCharArray();
 	
   static final int CASE_CODES_START = 2;
   public static final char[] IMPLEMENTS_TAG_FIELD_NAME = "ohl_name_tag".toCharArray();
+  private static final char[] OHL_CLASS_FIELD_NAME = "ohl_class".toCharArray();
   
   static class Cloner {
 
@@ -886,6 +921,17 @@ public class OhlSupport {
             
             visitorDecl.methods = new AbstractMethodDeclaration[] { md };
             
+            FieldDeclaration[] fields = typeDecl.fields;
+            if (fields == null) {
+              fields = new FieldDeclaration[] { createOhlClassField(typeDecl.name) };
+            } else {
+              FieldDeclaration[] fields2 = new FieldDeclaration[fields.length + 1];
+              System.arraycopy(fields, 0, fields2, 0, fields.length);
+              fields2[fields.length] = createOhlClassField(typeDecl.name);
+              fields = fields2;
+            }
+            typeDecl.fields = fields;
+            typeDecl.addClinit();
           }
         }
       }
