@@ -16,6 +16,16 @@ public class Generator {
         buildSideInterfaces(apiDir, side);
       }
     }
+    JavaPackage implDir = mainPackage.subpackage("impl");
+    for (Side side : graph.getSides()) {
+      if (side.getName().equals("client")) {
+        buildSideImplementation(implDir, packageName, side, clientProperties);
+      } else if (side.getName().equals("server")) {
+        buildSideImplementation(implDir, packageName, side, serverProperties);
+      } else {
+        throw new RuntimeException("Unsupported side");
+      }
+    }
   }
   
   public static void buildSideInterfaces(JavaPackage apiDir, Side side) throws IOException {
@@ -24,4 +34,47 @@ public class Generator {
       new SideInterfaceGenerator(sideDir, state).generate();
     }
   }
+  public static void buildSideImplementation(JavaPackage implDir, String basePackageName, Side side, SideImplProperties sideProperties) throws IOException {
+    JavaPackage sideDir = implDir.subpackage(side.getName());
+    for (StateOnSide state : side.getStates()) {
+      new SideImplGenerator(sideDir, basePackageName, state, sideProperties).generate();
+    }
+  }
+  
+  private final static SideImplProperties clientProperties = new SideImplProperties() {
+    @Override
+    public String getApiSuffix() {
+      return ".api.client";
+    }
+    @Override
+    public String getImplSuffix() {
+      return ".impl.client";
+    }
+    @Override
+    public String getSemaphoreSuffix() {
+      return "A";
+    }
+    @Override
+    public SideImplProperties getOpposite() {
+      return serverProperties;
+    }
+  };
+  private final static SideImplProperties serverProperties = new SideImplProperties() {
+    @Override
+    public String getApiSuffix() {
+      return ".api.server";
+    }
+    @Override
+    public String getImplSuffix() {
+      return ".impl.server";
+    }
+    @Override
+    public String getSemaphoreSuffix() {
+      return "B";
+    }
+    @Override
+    public SideImplProperties getOpposite() {
+      return clientProperties;
+    }
+  };
 }

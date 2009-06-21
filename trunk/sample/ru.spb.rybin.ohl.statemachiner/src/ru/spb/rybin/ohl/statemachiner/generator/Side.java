@@ -32,7 +32,13 @@ class Side {
     return states.values();
   }
 
+  public void analyze() {
+    for (StateOnSide st : getStates()) {
+      st.analyze();
+    }
+  } 
+
   private final String name;
   private final StateRepository stateRepositiory;
-  private final Map<String, StateOnSide> states = new HashMap<String, StateOnSide>(); 
+  private final Map<String, StateOnSide> states = new HashMap<String, StateOnSide>();
 }

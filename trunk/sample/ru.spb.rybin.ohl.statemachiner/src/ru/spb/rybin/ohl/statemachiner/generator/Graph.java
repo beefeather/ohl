@@ -66,6 +66,10 @@ public class Graph {
   
   public Graph(Collection<Side> sides) {
     this.sides = sides;
+    
+    for (Side side : sides) {
+      side.analyze();
+    }
   }
 
   Collection<Side> getSides() {
