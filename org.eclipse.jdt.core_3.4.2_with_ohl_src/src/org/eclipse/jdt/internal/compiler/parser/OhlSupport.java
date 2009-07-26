@@ -116,18 +116,6 @@ public class OhlSupport {
 		}
     //boolean size1NotZero = size1field + size1method != 0;
 		
-		{
-		  int nextN;
-		  for (int n = 0; n != 11; n = nextN) {
-		    if (n == 3) {
-		      nextN = 2;
-		    } else {
-		      break;
-		    }
-		  }
-		}
-		
-		
 		// Case holder (where case classes lies)
 		TypeDeclaration caseHolderDeclaration = new TypeDeclaration(enumDeclaration.compilationResult);
     setSourcePositionToPoint(caseHolderDeclaration, enumDeclaration.declarationSourceStart);
