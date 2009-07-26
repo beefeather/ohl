@@ -200,25 +200,6 @@ public class OhlSupport {
           
           visitorDeclaration.methods[i] = md;
         }
-//        for (int i=0; i<size1field; i++) {
-//          FieldDeclaration fl = allFields[field1Map[i]];
-//          
-//          MethodDeclaration md = new MethodDeclaration(enumDeclaration.compilationResult);
-//          md.modifiers |= ClassFileConstants.AccAbstract; 
-//
-//          
-//          String selector;
-//          if (fl.name == Parser.OHL_NO_TAG_IDENTIFIER) {
-//            selector = VISITOR_TYPE_METHOD_PREFIX;
-//          } else {
-//            selector = VISITOR_TYPE_METHOD_PREFIX + new String(fl.name);
-//          }
-//          md.selector = selector.toCharArray();
-//          md.returnType = TypeReference.baseTypeReference(TypeIds.T_int, 0);
-//          md.arguments = new Argument[] { new Argument("ohl_arg".toCharArray(), 0, fl.type, 0) };
-//          
-//          visitorDeclaration.methods[size1method + i] = md;
-//        }
       }
 		}
 
@@ -432,35 +413,6 @@ public class OhlSupport {
         createOhlClassField(enumDeclaration.name, enumDeclaration.sourceStart)
     };
 		
-//		
-//		{
-//
-//			
-//			for (int i=0; i<size1; i++) {
-//        MethodDeclaration md = (MethodDeclaration) allMethods[method1Map[i]];
-//				md.modifiers |= ClassFileConstants.AccAbstract; 
-//			    if (md.arguments == null) {
-//			    } else {
-//				    
-//            int argNumber = md.arguments.length;
-//						
-//						for (int j=0; j<argNumber; j++) {
-//						  
-//						  //constrArguments[j] = new SingleNameReference(md.arguments[j].name, 0);
-//						  
-//						}
-//						
-//						//TODO: duplicate static methods from each base enum-case here
-//						
-//				    }
-//			    }
-//			    
-//			    
-//			    {
-//				}
-//			}
-//		}
-//		
 	}
   
   static FieldDeclaration createOhlClassField(char[] classShortName, int enumPos) {
