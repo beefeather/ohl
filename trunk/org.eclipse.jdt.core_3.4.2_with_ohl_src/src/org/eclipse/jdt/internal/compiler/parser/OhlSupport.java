@@ -429,7 +429,7 @@ public class OhlSupport {
     enumDeclaration.memberTypes = new TypeDeclaration [] { caseHolderDeclaration, visitorDeclaration } ;
     
     enumDeclaration.fields = new FieldDeclaration [] {
-        createOhlClassField(enumDeclaration.name)
+        createOhlClassField(enumDeclaration.name, enumDeclaration.sourceStart)
     };
 		
 //		
@@ -463,8 +463,8 @@ public class OhlSupport {
 //		
 	}
   
-  static FieldDeclaration createOhlClassField(char[] classShortName) {
-    FieldDeclaration field = new FieldDeclaration(OHL_CLASS_FIELD_NAME, 0, 1);
+  static FieldDeclaration createOhlClassField(char[] classShortName, int enumPos) {
+    FieldDeclaration field = new FieldDeclaration(OHL_CLASS_FIELD_NAME, enumPos, enumPos + 2);
     field.modifiers |= ClassFileConstants.AccPublic | ClassFileConstants.AccFinal | ClassFileConstants.AccStatic;
     field.type = createOhlClassTypeReference(classShortName);
     
@@ -472,7 +472,14 @@ public class OhlSupport {
     initializer.type = createOhlClassTypeReference(classShortName);
     ClassLiteralAccess literal = new ClassLiteralAccess(0, new SingleTypeReference(VISITOR_INTERFACE_NAME.toCharArray(), 0));
     initializer.arguments = new Expression[] { literal };
+    initializer.sourceStart = enumPos + 1;
+    initializer.sourceEnd = enumPos + 2;
     field.initialization = initializer;
+    
+    field.declarationSourceStart = field.sourceStart;
+    field.declarationSourceEnd = field.sourceEnd;
+    field.declarationEnd = field.sourceEnd;
+    
     return field;
   }
   
@@ -922,12 +929,13 @@ public class OhlSupport {
             visitorDecl.methods = new AbstractMethodDeclaration[] { md };
             
             FieldDeclaration[] fields = typeDecl.fields;
+            FieldDeclaration ohlClassField = createOhlClassField(typeDecl.name, typeDecl.sourceStart);
             if (fields == null) {
-              fields = new FieldDeclaration[] { createOhlClassField(typeDecl.name) };
+              fields = new FieldDeclaration[] { ohlClassField };
             } else {
               FieldDeclaration[] fields2 = new FieldDeclaration[fields.length + 1];
               System.arraycopy(fields, 0, fields2, 0, fields.length);
-              fields2[fields.length] = createOhlClassField(typeDecl.name);
+              fields2[fields.length] = ohlClassField;
               fields = fields2;
             }
             typeDecl.fields = fields;
