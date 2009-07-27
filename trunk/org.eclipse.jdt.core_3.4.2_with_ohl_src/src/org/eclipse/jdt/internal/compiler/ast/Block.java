@@ -170,24 +170,47 @@ public class Block extends Statement {
             
           } break;
           case CaseStatement.OHL_STRUCT_CASE: {
-            char[] selector = ((SingleTypeReference)decl1.type).token;
-            TypeReference [] typeRefCopies = new TypeReference[3];
-            QualifiedTypeReference typeRef = (QualifiedTypeReference) binding2typeRef(visitorType);
-            for (int j=0; j<typeRefCopies.length; j++) {
-              QualifiedTypeReference memberType = (QualifiedTypeReference) OhlSupport.convertToMemberType(typeRef, selector, true);
-              if (memberType == null) {
-                typeRefCopies[j] = new SingleTypeReference("<unspecified>".toCharArray(), 0);
-              } else {
-                char [] [] tokens = memberType.tokens;
-                tokens[tokens.length-2] = OhlSupport.CASE_HOLDER_INTERFACE_NAME.toCharArray();
-                typeRefCopies[j] = memberType;
+            final char[] selector = ((SingleTypeReference)decl1.type).token;
+            final QualifiedTypeReference typeRef = (QualifiedTypeReference) binding2typeRef(visitorType);
+            //visitorType.
+            
+            // We prefer not to reuse AST elements and create anew each time.
+            class TypeReferenceFactory {
+              TypeReference create() {
+                QualifiedTypeReference memberType = (QualifiedTypeReference) OhlSupport.convertToMemberType(typeRef, selector, true);
+                if (memberType == null) {
+                  return new SingleTypeReference("<unspecified>".toCharArray(), 0);
+                } else {
+                  char [] [] tokens = memberType.tokens;
+                  //tokens[tokens.length-2] = OhlSupport.CASE_HOLDER_INTERFACE_NAME.toCharArray();
+                  return memberType;
+                }
+              }
+              TypeReference createObjectTypeReference() {
+                char [][] tokens = new char[][] {
+                    "java".toCharArray(),
+                    "lang".toCharArray(),
+                    "Object".toCharArray()
+                };
+                return new QualifiedTypeReference(tokens, new long[tokens.length]);
               }
             }
-            decl1.type = typeRefCopies[0];
-            ((CastExpression)decl1.initialization).type = typeRefCopies[1];
+            TypeReferenceFactory typeRefCopies = new TypeReferenceFactory();
+
+            ReferenceBinding subclass;
+            if (visitorType instanceof ReferenceBinding) {
+              ReferenceBinding visitorRefereceBinding = (ReferenceBinding)visitorType;
+              subclass = scope.getMemberType(selector, visitorRefereceBinding);
+            } else {
+              subclass = null;
+            }
             
-            ReferenceBinding subclass = (ReferenceBinding)typeRefCopies[2].resolveType(scope);
-            if (subclass != null) {
+            if (subclass == null || !subclass.isValidBinding()) {
+              decl1.type = typeRefCopies.createObjectTypeReference();
+              ((CastExpression)decl1.initialization).type = typeRefCopies.createObjectTypeReference();
+            } else {
+              decl1.type = typeRefCopies.create();
+              ((CastExpression)decl1.initialization).type = typeRefCopies.create();
               FieldBinding[] fields = subclass.fields();
               for (int j=0; j<fields.length; j++) {
                 // reverse order of statements/fields
@@ -197,7 +220,8 @@ public class Block extends Statement {
                   FieldReference initialization = (FieldReference)fieldDecl.initialization;
                   initialization.token = fields[j].name;
                   if (finalVarName != null) {
-                    ((SingleNameReference)initialization.receiver).token = finalVarName;
+                    // what is this?
+                    //((SingleNameReference)initialization.receiver).token = finalVarName;
                   }
                 }
               }

@@ -1,5 +1,7 @@
 package org.eclipse.jdt.internal.compiler.parser;
 
+import java.util.ArrayList;
+
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
@@ -23,13 +25,11 @@ import org.eclipse.jdt.internal.compiler.ast.NormalAnnotation;
 import org.eclipse.jdt.internal.compiler.ast.ParameterizedQualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.ParameterizedSingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedAllocationExpression;
-import org.eclipse.jdt.internal.compiler.ast.QualifiedNameReference;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.ast.SingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
-import org.eclipse.jdt.internal.compiler.ast.StringLiteral;
 import org.eclipse.jdt.internal.compiler.ast.SwitchStatement;
 import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.jdt.internal.compiler.ast.ThrowStatement;
@@ -42,138 +42,51 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 public class OhlSupport {
 
 	private static final String FIELD_PREFIX = "f_";
-  private static final String CASE_CLASS_PREFIX = "Case_";
+  public static final String CASE_CLASS_PREFIX = "";
   public static final String VISITOR_TYPE_METHOD_PREFIX = "visit_type_";
   private static final String VISITOR_STRUCT_METHOD_PREFIX = "visit_struct_";
   public static final char [] NO_TAG_IDENTIFIER = "<ohl no tag>".toCharArray();
 
   static void transformEnumCaseDeclaration(TypeDeclaration enumDeclaration) {
-
     enumDeclaration.ohlIsEnumCase = true;
     
+    // change to interface
+    enumDeclaration.modifiers &= ~(ClassFileConstants.AccAnnotation|ClassFileConstants.AccEnum);
+    enumDeclaration.modifiers |= ClassFileConstants.AccInterface;
+
+    // read fake fields and methods
+    FieldsMap fieldsMap = new FieldsMap(enumDeclaration.methods, enumDeclaration.fields);
+
     TypeReference[] origSuperInterfaces = enumDeclaration.superInterfaces;
     enumDeclaration.superInterfaces = null;
-		TypeParameter[] typeParameters = enumDeclaration.typeParameters;
-		enumDeclaration.typeParameters = null;
+    TypeParameter[] typeParameters = enumDeclaration.typeParameters;
 
 
-    AbstractMethodDeclaration [] allMethods = enumDeclaration.methods;
-    FieldDeclaration[] allFields = enumDeclaration.fields;
-		
-    // Filter-out methods
-    int [] method1Map;
-    int [] field1Map;
-    int size1fieldx;
-    int size1method;
-		{
-      if (allMethods == null) {
-        size1method = 0;
-        method1Map = null;
-      } else {
-        method1Map = new int[allMethods.length];
-        
-        size1method = 0;
-        {
-          int [] method2Map = new int[allMethods.length];
-          int size2 = 0;
-          for (int i=0; i<allMethods.length; i++) {
-            if (allMethods[i] instanceof MethodDeclaration) {
-              method1Map[size1method] = i;
-              size1method++;
-            } else {
-              method2Map[size2] = i;
-              size2++;
-            }
-          }
-          AbstractMethodDeclaration [] newEnumMethods = new AbstractMethodDeclaration[allMethods.length];
-          for (int i=0; i<size2; i++) {
-            newEnumMethods[method2Map[i]] = allMethods[method2Map[i]];
-          }
-          enumDeclaration.methods = newEnumMethods;
-        }
-      }
-      if (allFields == null) {
-        size1fieldx = 0;
-        field1Map = null;
-      } else {
-        field1Map = new int[allFields.length];
-        
-        size1fieldx = 0;
-        {
-          int [] field2Map = new int[allFields.length];
-          int size2 = 0;
-          for (int i=0; i<allFields.length; i++) {
-            if (true /*allFields[i] instanceof FieldDeclaration*/) {
-              field1Map[size1fieldx] = i;
-              size1fieldx++;
-            } else {
-              field2Map[size2] = i;
-              size2++;
-            }
-          }
-        }
-      }
-		}
-    //boolean size1NotZero = size1field + size1method != 0;
-		
-		// Case holder (where case classes lies)
-		TypeDeclaration caseHolderDeclaration = new TypeDeclaration(enumDeclaration.compilationResult);
-    setSourcePositionToPoint(caseHolderDeclaration, enumDeclaration.declarationSourceStart);
-		caseHolderDeclaration.enclosingType = enumDeclaration;
-		caseHolderDeclaration.modifiers |= ClassFileConstants.AccPublic | ClassFileConstants.AccInterface;
-		caseHolderDeclaration.name = CASE_HOLDER_INTERFACE_NAME.toCharArray();
-		if (origSuperInterfaces != null) {
-      caseHolderDeclaration.superInterfaces = new TypeReference[origSuperInterfaces.length];
-		  for (int i=0; i<origSuperInterfaces.length; i++) {
-        caseHolderDeclaration.superInterfaces[i] = 
-          convertToMemberType(origSuperInterfaces[i], CASE_HOLDER_INTERFACE_NAME.toCharArray(), false);
-		  }
-		}
-		
-
-		TypeDeclaration visitorDeclaration;
-		{
-		  // Visitor interface
-      visitorDeclaration = new TypeDeclaration(enumDeclaration.compilationResult);
-      visitorDeclaration.enclosingType = enumDeclaration;
-      visitorDeclaration.modifiers |= ClassFileConstants.AccPublic | ClassFileConstants.AccInterface;
-      visitorDeclaration.name = VISITOR_INTERFACE_NAME.toCharArray();
-      setSourcePositionToPoint(visitorDeclaration, enumDeclaration.declarationSourceStart);
-      
-      int superInterfacesLength = size1fieldx;
+    {
+      int superInterfacesLength = fieldsMap.size1fieldx;
       if (origSuperInterfaces != null) {
         superInterfacesLength += origSuperInterfaces.length;
       }
-      
       if (superInterfacesLength != 0) {
-        visitorDeclaration.superInterfaces = new TypeReference[superInterfacesLength];
-
-        for (int i = 0; i<size1fieldx; i++) {
-          FieldDeclaration fl = allFields[field1Map[i]];
-          TypeReference ref1 = convertToMemberType(fl.type, VISITOR_INTERFACE_NAME.toCharArray(), true);
-          visitorDeclaration.superInterfaces[i] = ref1;
+        enumDeclaration.superInterfaces = new TypeReference[superInterfacesLength];
+    
+        for (int i = 0; i<fieldsMap.size1fieldx; i++) {
+          FieldDeclaration fl = fieldsMap.allFields[fieldsMap.field1Map[i]];
+          TypeReference ref1 = convertToMemberType(fl.type, USER_CLASS_VISITOR_INTERFACE_NAME.toCharArray(), true);
+          enumDeclaration.superInterfaces[i] = ref1;
         }
         if (origSuperInterfaces != null) {
           for (int i=0; i<origSuperInterfaces.length; i++) {
             TypeReference refOrig = origSuperInterfaces[i];
-            TypeReference ref1 = convertToMemberType(refOrig, VISITOR_INTERFACE_NAME.toCharArray(), true);
-            visitorDeclaration.superInterfaces[size1fieldx + i] = ref1;
-            
-  //          if (ref1.typeParameters != null) {
-  //            visitorDeclaration.typeParameters = new TypeParameter[typeParameters.length];
-  //            System.arraycopy(typeParameters, 0, visitorDeclaration.typeParameters, 0, typeParameters.length);
-  //          }
+            enumDeclaration.superInterfaces[fieldsMap.size1fieldx + i] = refOrig;
           }
         }
       }
-      if (typeParameters != null) {
-        visitorDeclaration.typeParameters = Cloner.clone(typeParameters);
-      }
       
-      if (size1method != 0) {
-        visitorDeclaration.methods = new AbstractMethodDeclaration[size1method];
-        for (int i=0; i<size1method; i++) {
-          MethodDeclaration origMd = (MethodDeclaration) allMethods[method1Map[i]];
+      if (fieldsMap.size1method != 0) {
+        enumDeclaration.methods = new AbstractMethodDeclaration[fieldsMap.size1method];
+        for (int i=0; i<fieldsMap.size1method; i++) {
+          MethodDeclaration origMd = (MethodDeclaration) fieldsMap.allMethods[fieldsMap.method1Map[i]];
           
           MethodDeclaration md = new MethodDeclaration(origMd.compilationResult);
           md.modifiers |= ClassFileConstants.AccAbstract; 
@@ -186,223 +99,235 @@ public class OhlSupport {
           setMethodSourcePosition(md, origMd);
           
           
-          visitorDeclaration.methods[i] = md;
+          enumDeclaration.methods[i] = md;
         }
       }
-		}
+    }
 
-		{ 
-      // Factory methods
-      if (size1method != 0) {
-        caseHolderDeclaration.memberTypes = new TypeDeclaration[size1method];
-        for (int i=0; i<size1method; i++) {
-          MethodDeclaration origMd = (MethodDeclaration) allMethods[method1Map[i]];
-          MethodDeclaration factoryMethod;
-          {
-            factoryMethod = new MethodDeclaration(enumDeclaration.compilationResult);
-            factoryMethod.selector = origMd.selector;
-            factoryMethod.modifiers |= ClassFileConstants.AccStatic | ClassFileConstants.AccPublic;
-            setMethodSourcePosition(factoryMethod, origMd);
-
-            if (typeParameters != null) {
-              factoryMethod.typeParameters = Cloner.clone(typeParameters);
-            }            
-
-            if (origMd.arguments == null) {
-            } else {
-              int argNumber = origMd.arguments.length;
-              factoryMethod.arguments = new Argument[argNumber];
-              for (int j=0; j<argNumber; j++) {
-                factoryMethod.arguments[j] = 
-                  new Argument(origMd.arguments[j].name, 0, origMd.arguments[j].type, 0);
-              }
-            }
-
-            QualifiedTypeReference caseClassReference;
-            if (typeParameters == null) {
-              caseClassReference = new QualifiedTypeReference(
-                  new char [] [] {
-                      CASE_HOLDER_INTERFACE_NAME.toCharArray(),
-                      (CASE_CLASS_PREFIX + new String(origMd.selector)).toCharArray()
-                  },
-                  new long [2]);
-            } else {
-              TypeReference [][] copyParams = new TypeReference[2][];
-              copyParams[1] = convertParamsToRefs(typeParameters);
-              
-              caseClassReference = new ParameterizedQualifiedTypeReference(
-                  new char [] [] {
-                      CASE_HOLDER_INTERFACE_NAME.toCharArray(),
-                      (CASE_CLASS_PREFIX + new String(origMd.selector)).toCharArray()
-                  },
-                  copyParams,
-                  0,
-                  new long [2]);
-            }
-            factoryMethod.returnType = caseClassReference;
-
-            Expression returnExpression;
-            if (origMd.arguments == null) {
-              QualifiedNameReference fieldReference = new QualifiedNameReference(
-                new char [] [] {
-                  CASE_HOLDER_INTERFACE_NAME.toCharArray(),
-                  (CASE_CLASS_PREFIX + new String(origMd.selector)).toCharArray(),
-                  SINGLETON_FIELD_NAME.toCharArray()
-                
-                },
-                new long [3], 0 ,0);
-              returnExpression = fieldReference;
-            } else {
-              AllocationExpression allocation = new AllocationExpression();
-              allocation.type = caseClassReference;
+    ArrayList enumMemberTypes = new ArrayList();
+    ArrayList enumFields = new ArrayList();
   
-              int argNumber = origMd.arguments.length;
-              Expression [] allocationArguments = new Expression[argNumber];
-              for (int j=0; j<argNumber; j++) {
-                allocationArguments[j] = new SingleNameReference(origMd.arguments[j].name, 0);
-              }
-              
-              allocation.arguments = allocationArguments;
-              returnExpression = allocation; 
-            }
-            Statement returnStatement = new ReturnStatement(returnExpression, 0, 0);
-            factoryMethod.statements = new Statement[] { returnStatement };
-          }
+    // case classes 
+    {
+      if (fieldsMap.size1method != 0) {
+        for (int i=0; i<fieldsMap.size1method; i++) {
+          MethodDeclaration origMd = (MethodDeclaration) fieldsMap.allMethods[fieldsMap.method1Map[i]];
           
-          enumDeclaration.methods[method1Map[i]] = factoryMethod;
-        }
-      }
-    }		
-		
-		
-		// case classes 
-		{
-      if (size1method != 0) {
-        caseHolderDeclaration.memberTypes = new TypeDeclaration[size1method];
-        for (int i=0; i<size1method; i++) {
-          MethodDeclaration origMd = (MethodDeclaration) allMethods[method1Map[i]];
-          
-          TypeDeclaration subClass = new TypeDeclaration(enumDeclaration.compilationResult);
-          subClass.enclosingType = caseHolderDeclaration;
-          String oldSelector = new String(origMd.selector);
-          subClass.name = (CASE_CLASS_PREFIX+oldSelector).toCharArray();
-          subClass.modifiers |= ClassFileConstants.AccStatic | ClassFileConstants.AccPublic;
-          subClass.typeParameters = Cloner.clone(typeParameters);
-          
-          TypeReference visitorRef;
-          if (typeParameters == null) {
-            visitorRef = new SingleTypeReference(VISITOR_INTERFACE_NAME.toCharArray(), 0);
+          TypeDeclaration subClass = createCaseClass(origMd, enumDeclaration.compilationResult,
+              typeParameters, enumDeclaration.name);
+
+          if (subClass.fields == null && typeParameters == null) {
+            subClass.modifiers &= ~(ClassFileConstants.AccStatic | ClassFileConstants.AccPublic); 
+            
+            // Create singleton and put as field
+            TypeDeclaration anonymousType = subClass;
+            anonymousType.name = CharOperation.NO_CHAR;
+            anonymousType.bits |= (ASTNode.IsAnonymousType|ASTNode.IsLocalType);
+            setSourcePositionToPoint(anonymousType, origMd.sourceStart);
+            
+            QualifiedAllocationExpression alloc = new QualifiedAllocationExpression(anonymousType);
+            alloc.anonymousType = anonymousType;
+            anonymousType.allocation = alloc;
+            //anonymousType.superInterfaces = new TypeReference[] { makeEnumCaseBaseRefernce(new SingleTypeReference(enumDeclaration.name, 0)) } ;
+            
+            TypeReference anonClassTypeRef = makeEnumCaseBaseRefernce(new SingleTypeReference(enumDeclaration.name, 0));
+            alloc.type = anonClassTypeRef;
+            alloc.statementEnd = -1;
+            
+            FieldDeclaration fd = new FieldDeclaration(origMd.selector, origMd.sourceStart, origMd.sourceEnd);
+            // we do not support parameterized types here
+            fd.type = makeEnumCaseBaseRefernce(new SingleTypeReference(enumDeclaration.name, 0));
+            fd.initialization = alloc;
+            enumFields.add(fd);
+            
           } else {
-            TypeReference [] refTypeParameters = convertParamsToRefs(typeParameters);
-            visitorRef = new ParameterizedSingleTypeReference(VISITOR_INTERFACE_NAME.toCharArray(), refTypeParameters, 0, 0l);
+            subClass.enclosingType = enumDeclaration;
+            enumMemberTypes.add(subClass);
           }
-          
-          // ru.spb.rybin.ohl.lang.EnumCaseBase<Visitor>
-          subClass.superInterfaces = new TypeReference[] {  makeEnumCaseBaseRefernce(visitorRef) };
-          subClass.modifiers |= ClassFileConstants.AccStatic;
-          
-          ConstructorDeclaration constructor;
-          // Constructor
-          {
-            constructor = new ConstructorDeclaration(enumDeclaration.compilationResult);
-            constructor.selector = subClass.name; 
-            constructor.modifiers |= ClassFileConstants.AccPublic;
-
-
-            if (origMd.arguments == null) {
-            } else {
-              int argNumber = origMd.arguments.length;
-              //Expression [] constrArguments = new Expression[argNumber];
-              constructor.arguments = new Argument[argNumber];
-              Statement[] constrStatements = new Statement[argNumber]; 
-              for (int j=0; j<argNumber; j++) {
-                constructor.arguments[j] = 
-                  new Argument(origMd.arguments[j].name, 0, origMd.arguments[j].type, 0);
-                
-                ThisReference thisReference = new ThisReference(0, 0);
-                FieldReference fieldReference = new FieldReference((FIELD_PREFIX+new String(origMd.arguments[j].name)).toCharArray(), 0);
-                fieldReference.receiver = thisReference;
-                
-                Expression lvalue = fieldReference;
-                
-                SingleNameReference rvalue = new SingleNameReference(origMd.arguments[j].name, 0);
-                constrStatements[j] = new Assignment(lvalue, rvalue, 0);
-              }
-              constructor.statements = constrStatements;
-            }
-          }
-          
-          // Accept method
-          MethodDeclaration acceptMethod;
-          {
-            acceptMethod = new MethodDeclaration(enumDeclaration.compilationResult);
-            acceptMethod.selector = ACCEPT_METHOD_SELECTOR;
-            acceptMethod.returnType = TypeReference.baseTypeReference(TypeIds.T_int, 0);
-            acceptMethod.arguments = new Argument[] { new Argument("visitor".toCharArray(), 0, visitorRef, 0) };
-            acceptMethod.modifiers |= ClassFileConstants.AccPublic;
-
-            MessageSend acceptMessageSend = new MessageSend();
-            acceptMessageSend.receiver = new SingleNameReference("visitor".toCharArray(), 0);
-            acceptMessageSend.selector = (VISITOR_STRUCT_METHOD_PREFIX+oldSelector).toCharArray();
-            Statement acceptStatement = new ReturnStatement(acceptMessageSend, 0, 0);
-            acceptMethod.statements = new Statement [] { acceptStatement };
-            if (origMd.arguments == null) {
-            } else {
-              int argNumber = origMd.arguments.length;
-              Expression [] acceptArguments = new Expression[argNumber];
-              for (int j=0; j<argNumber; j++) {
-                ThisReference thisReference = new ThisReference(0, 0);
-                FieldReference fieldReference = 
-                  new FieldReference((FIELD_PREFIX+new String(origMd.arguments[j].name)).toCharArray(), 0);
-                fieldReference.receiver = thisReference;
-                
-                Expression lvalue = fieldReference;
-                acceptArguments[j] = lvalue;
-              }
-              acceptMessageSend.arguments = acceptArguments;
-            }
-          }
-          
-          // Fields
-          {
-            if (origMd.arguments == null) {
-              FieldDeclaration field = new FieldDeclaration();
-              field.name = SINGLETON_FIELD_NAME.toCharArray();
-              field.type = new SingleTypeReference(subClass.name, 0);
-              field.modifiers |= ClassFileConstants.AccPublic | ClassFileConstants.AccFinal | ClassFileConstants.AccStatic;
-              AllocationExpression initializer = new AllocationExpression();
-              initializer.type = new SingleTypeReference(subClass.name, 0);
-              field.initialization = initializer;
-              subClass.fields = new FieldDeclaration[] { field };
-            } else {
-              int argNumber = origMd.arguments.length;
-              FieldDeclaration[] fields = new FieldDeclaration[argNumber];
-              for (int j=0; j<argNumber; j++) {
-                fields[j] = new FieldDeclaration();
-                fields[j].name = (FIELD_PREFIX+new String(origMd.arguments[j].name)).toCharArray();
-                fields[j].type = origMd.arguments[j].type;
-                fields[j].modifiers |= ClassFileConstants.AccPublic | ClassFileConstants.AccFinal;
-              }
-              subClass.fields = fields;
-            }
-          }
-
-          subClass.methods = new AbstractMethodDeclaration[] { constructor, acceptMethod };
-          subClass.addClinit();
-
-          caseHolderDeclaration.memberTypes[i] = subClass;
         }
       }
-		}
+    }
 
-    enumDeclaration.memberTypes = new TypeDeclaration [] { caseHolderDeclaration, visitorDeclaration } ;
+
+    enumFields.add(createOhlClassField(enumDeclaration.name, enumDeclaration.sourceStart));
     
-    enumDeclaration.fields = new FieldDeclaration [] {
-        createOhlClassField(enumDeclaration.name, enumDeclaration.sourceStart)
-    };
-		
-	}
+    enumDeclaration.memberTypes = (TypeDeclaration[]) enumMemberTypes.toArray(new TypeDeclaration[enumMemberTypes.size()]);
+    enumDeclaration.fields = (FieldDeclaration[]) enumFields.toArray(new FieldDeclaration[enumFields.size()]);
+  }
   
+  private static TypeDeclaration createCaseClass(MethodDeclaration origMd, CompilationResult compilationResult,
+      TypeParameter[] typeParameters, char[] enumDeclarationName) {
+    TypeDeclaration subClass = new TypeDeclaration(compilationResult);
+    String oldSelector = new String(origMd.selector);
+    subClass.name = (CASE_CLASS_PREFIX+oldSelector).toCharArray();
+    subClass.modifiers |= ClassFileConstants.AccStatic | ClassFileConstants.AccPublic;
+    subClass.typeParameters = Cloner.clone(typeParameters);
+    
+    TypeReference visitorRef;
+    if (typeParameters == null) {
+      visitorRef = new SingleTypeReference(enumDeclarationName, 0);
+    } else {
+      TypeReference [] refTypeParameters = convertParamsToRefs(typeParameters);
+      visitorRef = new ParameterizedSingleTypeReference(enumDeclarationName, refTypeParameters, 0, 0l);
+    }
+    
+    // ru.spb.rybin.ohl.lang.EnumCaseBase<Visitor>
+    subClass.superInterfaces = new TypeReference[] {  makeEnumCaseBaseRefernce(visitorRef) };
+    
+    ConstructorDeclaration constructor;
+    // Constructor
+    {
+      if (origMd.arguments == null) {
+        constructor = null;
+      } else {
+        constructor = new ConstructorDeclaration(compilationResult);
+        constructor.selector = subClass.name; 
+        constructor.modifiers |= ClassFileConstants.AccPublic;
+        int argNumber = origMd.arguments.length;
+        //Expression [] constrArguments = new Expression[argNumber];
+        constructor.arguments = new Argument[argNumber];
+        Statement[] constrStatements = new Statement[argNumber]; 
+        for (int j=0; j<argNumber; j++) {
+          constructor.arguments[j] = 
+            new Argument(origMd.arguments[j].name, 0, origMd.arguments[j].type, 0);
+          
+          ThisReference thisReference = new ThisReference(0, 0);
+          FieldReference fieldReference = new FieldReference((FIELD_PREFIX+new String(origMd.arguments[j].name)).toCharArray(), 0);
+          fieldReference.receiver = thisReference;
+          
+          Expression lvalue = fieldReference;
+          
+          SingleNameReference rvalue = new SingleNameReference(origMd.arguments[j].name, 0);
+          constrStatements[j] = new Assignment(lvalue, rvalue, 0);
+        }
+        constructor.statements = constrStatements;
+      }
+    }
+    
+    // Accept method
+    MethodDeclaration acceptMethod;
+    {
+      acceptMethod = new MethodDeclaration(compilationResult);
+      acceptMethod.selector = ACCEPT_METHOD_SELECTOR;
+      acceptMethod.returnType = TypeReference.baseTypeReference(TypeIds.T_int, 0);
+      acceptMethod.arguments = new Argument[] { new Argument("visitor".toCharArray(), 0, visitorRef, 0) };
+      acceptMethod.modifiers |= ClassFileConstants.AccPublic;
+
+      MessageSend acceptMessageSend = new MessageSend();
+      acceptMessageSend.receiver = new SingleNameReference("visitor".toCharArray(), 0);
+      acceptMessageSend.selector = (VISITOR_STRUCT_METHOD_PREFIX+oldSelector).toCharArray();
+      Statement acceptStatement = new ReturnStatement(acceptMessageSend, 0, 0);
+      acceptMethod.statements = new Statement [] { acceptStatement };
+      if (origMd.arguments == null) {
+      } else {
+        int argNumber = origMd.arguments.length;
+        Expression [] acceptArguments = new Expression[argNumber];
+        for (int j=0; j<argNumber; j++) {
+          ThisReference thisReference = new ThisReference(0, 0);
+          FieldReference fieldReference = 
+            new FieldReference((FIELD_PREFIX+new String(origMd.arguments[j].name)).toCharArray(), 0);
+          fieldReference.receiver = thisReference;
+          
+          Expression lvalue = fieldReference;
+          acceptArguments[j] = lvalue;
+        }
+        acceptMessageSend.arguments = acceptArguments;
+      }
+    }
+    
+    // Fields
+    {
+      if (origMd.arguments == null) {
+        subClass.fields = null;
+      } else {
+        int argNumber = origMd.arguments.length;
+        FieldDeclaration[] fields = new FieldDeclaration[argNumber];
+        for (int j=0; j<argNumber; j++) {
+          fields[j] = new FieldDeclaration();
+          fields[j].name = (FIELD_PREFIX+new String(origMd.arguments[j].name)).toCharArray();
+          fields[j].type = origMd.arguments[j].type;
+          fields[j].modifiers |= ClassFileConstants.AccPublic | ClassFileConstants.AccFinal;
+        }
+        subClass.fields = fields;
+      }
+    }
+
+    if (constructor == null) {
+      subClass.methods = new AbstractMethodDeclaration[] { acceptMethod };
+    } else {
+      subClass.methods = new AbstractMethodDeclaration[] { constructor, acceptMethod };
+    }
+    subClass.addClinit();
+    
+    return subClass;
+  }
+  
+  
+  private static class FieldsMap {
+    final FieldDeclaration[] allFields;
+    int size1fieldx;
+    final int[] method1Map;
+    final AbstractMethodDeclaration[] allMethods;
+    int size1method;
+    int [] field1Map;
+
+    FieldsMap(AbstractMethodDeclaration [] allMethods0, FieldDeclaration[] allFields0) {
+      allMethods = allMethods0;
+      allFields = allFields0;
+      
+      // Filter-out methods
+      {
+        if (allMethods == null) {
+          size1method = 0;
+          method1Map = null;
+        } else {
+          method1Map = new int[allMethods.length];
+          
+          size1method = 0;
+          {
+            int [] method2Map = new int[allMethods.length];
+            int size2 = 0;
+            for (int i=0; i<allMethods.length; i++) {
+              if (allMethods[i] instanceof MethodDeclaration) {
+                method1Map[size1method] = i;
+                size1method++;
+              } else {
+                method2Map[size2] = i;
+                size2++;
+              }
+            }
+            AbstractMethodDeclaration [] newEnumMethods = new AbstractMethodDeclaration[allMethods.length];
+            for (int i=0; i<size2; i++) {
+              newEnumMethods[method2Map[i]] = allMethods[method2Map[i]];
+            }
+            //enumDeclaration.methods = newEnumMethods;
+          }
+        }
+        if (allFields == null) {
+          size1fieldx = 0;
+          field1Map = null;
+        } else {
+          field1Map = new int[allFields.length];
+          
+          size1fieldx = 0;
+          {
+            int [] field2Map = new int[allFields.length];
+            int size2 = 0;
+            for (int i=0; i<allFields.length; i++) {
+              if (true /*allFields[i] instanceof FieldDeclaration*/) {
+                field1Map[size1fieldx] = i;
+                size1fieldx++;
+              } else {
+                field2Map[size2] = i;
+                size2++;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   static FieldDeclaration createOhlClassField(char[] classShortName, int enumPos) {
     FieldDeclaration field = new FieldDeclaration(OHL_CLASS_FIELD_NAME, enumPos, enumPos + 2);
     field.modifiers |= ClassFileConstants.AccPublic | ClassFileConstants.AccFinal | ClassFileConstants.AccStatic;
@@ -410,7 +335,7 @@ public class OhlSupport {
     
     AllocationExpression initializer = new AllocationExpression();
     initializer.type = createOhlClassTypeReference(classShortName);
-    ClassLiteralAccess literal = new ClassLiteralAccess(0, new SingleTypeReference(VISITOR_INTERFACE_NAME.toCharArray(), 0));
+    ClassLiteralAccess literal = new ClassLiteralAccess(0, new SingleTypeReference(classShortName, 0));
     initializer.arguments = new Expression[] { literal };
     initializer.sourceStart = enumPos + 1;
     initializer.sourceEnd = enumPos + 2;
@@ -425,8 +350,9 @@ public class OhlSupport {
   
   static TypeReference createOhlClassTypeReference(char[] classShortName) {
     TypeReference [][] typeArguments = new TypeReference [OHL_CLASS_TOKENS.length][];
-    TypeReference visitorReference = new QualifiedTypeReference(new char[][] { classShortName, VISITOR_INTERFACE_NAME.toCharArray() },
-                                                                new long[2]);
+//    TypeReference visitorReference = new QualifiedTypeReference(new char[][] { classShortName, VISITOR_INTERFACE_NAME.toCharArray() },
+//        new long[2]);
+    TypeReference visitorReference = new SingleTypeReference(classShortName, 0);
     typeArguments[OHL_CLASS_TOKENS.length-1] = new TypeReference[] { visitorReference };
     return new ParameterizedQualifiedTypeReference(OHL_CLASS_TOKENS, typeArguments, 0, new long[OHL_CLASS_TOKENS.length]);
   }
@@ -701,7 +627,7 @@ public class OhlSupport {
 		return res;
 	}
 
-	public static final String VISITOR_INTERFACE_NAME = "Visitor";
+  public static final String USER_CLASS_VISITOR_INTERFACE_NAME = "Visitor";
 	public static final char [][] ENUM_CASE_BASE_TOKENS = {
       "ru".toCharArray(), 
       "spb".toCharArray(), 
@@ -718,7 +644,7 @@ public class OhlSupport {
     "lang".toCharArray(), 
     "OhlClass".toCharArray()              
 };
-	public static final String CASE_HOLDER_INTERFACE_NAME = "C";
+	//public static final String CASE_HOLDER_INTERFACE_NAME = "C";
   public static final String SINGLETON_FIELD_NAME = "instance";
   public static final char[] ACCEPT_METHOD_SELECTOR = "accept".toCharArray();
 	
@@ -833,13 +759,13 @@ public class OhlSupport {
           
           {
             ref1.typeArguments[ref1.typeArguments.length - 1] = new TypeReference [] { 
-                convertToMemberType(new Util().getSelfReference(), VISITOR_INTERFACE_NAME.toCharArray(), true) };
+                convertToMemberType(new Util().getSelfReference(), USER_CLASS_VISITOR_INTERFACE_NAME.toCharArray(), true) };
           }
           
           if (ref1.ohlImplementsTag != null) {
             TypeDeclaration visitorDecl = new TypeDeclaration(typeDecl.compilationResult);
             visitorDecl.enclosingType = typeDecl;
-            visitorDecl.name = VISITOR_INTERFACE_NAME.toCharArray();
+            visitorDecl.name = USER_CLASS_VISITOR_INTERFACE_NAME.toCharArray();
             visitorDecl.modifiers |= ClassFileConstants.AccInterface | ClassFileConstants.AccStatic 
                 | ClassFileConstants.AccPublic | ClassFileConstants.AccAbstract;
             visitorDecl.typeParameters = Cloner.clone(typeDecl.typeParameters);
