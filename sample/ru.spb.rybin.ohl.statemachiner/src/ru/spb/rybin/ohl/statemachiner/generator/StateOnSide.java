@@ -86,7 +86,7 @@ public class StateOnSide {
       edge.setComingBack(comingBack);
       EdgeReturn.Type.case returnType;
       if (comingBack.isEmpty()) {
-        returnType = EdgeReturn.Type.void_type();
+        returnType = EdgeReturn.Type.void_type;
       } else if (comingBack.size() == 1) {
         TransitionData transitionData = comingBack.iterator().next().getTransition().getTransitionData();
         if (transitionData == null) {

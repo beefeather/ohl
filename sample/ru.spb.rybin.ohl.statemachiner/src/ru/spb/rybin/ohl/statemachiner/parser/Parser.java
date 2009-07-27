@@ -3,7 +3,6 @@ package ru.spb.rybin.ohl.statemachiner.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.spb.rybin.ohl.lang.EnumCaseBase;
 import ru.spb.rybin.ohl.lang.OhlClass;
 import ru.spb.rybin.ohl.statemachiner.parser.ast.ConnectorDirection;
 import ru.spb.rybin.ohl.statemachiner.parser.ast.FormalParameter;
@@ -30,7 +29,7 @@ public class Parser {
   StateMachine parse() throws ParserException {
     final List<StateDefinition> states = new ArrayList<StateDefinition>();
     final List<Transition> transitions = new ArrayList<Transition>();
-    while (lexer.peek() != TokensEof.eof()) {
+    while (lexer.peek() != TokensEof.eof) {
       switch (lexer.peek()) {
       case * client() {
         transitions.add(parseTransition());
@@ -62,14 +61,14 @@ public class Parser {
     lexer.consume();
     final String name = expectIdentifier();
     final StateReference nextState;
-    if (optionalToken(ConnectorTokens.toRight())) {
+    if (optionalToken(ConnectorTokens.toRight)) {
       nextState = parseStateReference();
     } else {
       nextState = null;
     }
-    expectToken(Tokens.openBrace());
+    expectToken(Tokens.openBrace);
     final List<FormalParameter> fields = parseStateBody();
-    expectToken(Tokens.closeBrace());
+    expectToken(Tokens.closeBrace);
     
     return new StateDefinition() {
       @Override
@@ -95,7 +94,7 @@ public class Parser {
         break;
       }
       result.add(next);
-      expectToken(Tokens.semicolon());
+      expectToken(Tokens.semicolon);
     }
     return result;
   }
@@ -135,20 +134,20 @@ public class Parser {
 
     final Position position = lexer.currentPosition();
     Side side1 = new Side();
-    side1.qualifier = expectToken(StateQualifier.ohl_class);
+    side1.qualifier = expectTokenClass(StateQualifier.ohl_class);
     side1.state = parseStateReference();
-    side1.connector = expectToken(ConnectorTokens.ohl_class);
+    side1.connector = expectTokenClass(ConnectorTokens.ohl_class);
     final TransitionData transitionData = parseTransitionData();
     Side side2 = new Side();
     if (transitionData == null) {
       side2.connector = side1.connector;
     } else {
-      side2.connector = expectToken(ConnectorTokens.ohl_class);
+      side2.connector = expectTokenClass(ConnectorTokens.ohl_class);
     }
-    side2.qualifier = expectToken(StateQualifier.ohl_class);
+    side2.qualifier = expectTokenClass(StateQualifier.ohl_class);
     side2.state = parseStateReference();
     
-    expectToken(Tokens.semicolon());
+    expectToken(Tokens.semicolon);
 
     final Side sideFrom;
     final Side sideTo;
@@ -205,16 +204,16 @@ public class Parser {
   private ConnectorDirection.case getConnectorDirection(ConnectorTokens.case connector) {
     switch (connector) {
     case * toLeft() {
-      return ConnectorDirection.left();
+      return ConnectorDirection.left;
     }
     case * toRight() {
-      return ConnectorDirection.right();
+      return ConnectorDirection.right;
     }
     case * toLeftFork() {
-      return ConnectorDirection.left();
+      return ConnectorDirection.left;
     }
     case * toRightFork() {
-      return ConnectorDirection.right();
+      return ConnectorDirection.right;
     }
     }
   }
@@ -239,17 +238,17 @@ public class Parser {
   private TransitionData parseTransitionData() throws ParserException {
     final String name = optionalIdentifier();
     if (name == null) {
-      if (!optionalToken(Tokens.openParen())) {
+      if (!optionalToken(Tokens.openParen)) {
         return null;
       }
     } else {
-      expectToken(Tokens.openParen());
+      expectToken(Tokens.openParen);
     }
     final List<FormalParameter> params = new ArrayList<FormalParameter>();
     FormalParameter parameter = parseFormalParameter();
     if (parameter != null) {
       params.add(parameter);
-      while (optionalToken(Tokens.comma())) {
+      while (optionalToken(Tokens.comma)) {
         parameter = parseFormalParameter();
         if (parameter == null) {
           throw new AutoParserException("Parameter expected");
@@ -257,7 +256,7 @@ public class Parser {
         params.add(parameter);
       }
     }
-    expectToken(Tokens.closeParen());
+    expectToken(Tokens.closeParen);
     return new TransitionData() {
       @Override
       public String getMethodName() {
@@ -317,9 +316,16 @@ public class Parser {
     }
   }
 
-  // maybe new syntax "case<T>" 
-  private <T> EnumCaseBase<? super T> expectToken(OhlClass<T> tokenClass) {
-    EnumCaseBase<? super T> res = tokenClass.cast_if(lexer.peek());
+  private <T> T.case expectTokenClass(OhlClass<? super T> tokenClass) {
+    T.case res = tokenClass.cast_if(lexer.peek());
+    if (res != null) {
+      lexer.consume();
+    }
+    return res;
+  }
+  
+  private Tokens.case expectTokenClass2(OhlClass<? super Tokens> tokenClass) {
+    Tokens.case res = tokenClass.cast_if(lexer.peek());
     if (res != null) {
       lexer.consume();
     }
