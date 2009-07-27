@@ -1,8 +1,7 @@
 package ru.spb.rybin.ohl.v2.samples.expressionparser;
 
 public interface Lexer {
-	
-  Tokens.case peek();
+  TokensEx.case peek();
   void consume();
   
   public enum-case Tokens {
@@ -11,7 +10,9 @@ public interface Lexer {
     case paren_open(),
     case paren_close(),
     case literal(int num),
-    case identifier(String name),
+    case identifier(String name)
+  }
+  public enum-case TokensEx extends Tokens{
     case eos()
   }
 }
