@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/ru.spb.rybin.ohl.statemachiner/src/ru/spb/rybin/ohl/statemachiner/Main.java"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="1"/>
+</listAttribute>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="ru.spb.rybin.ohl.statemachiner.Main"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="${workspace_loc}/ru.spb.rybin.ohl.v2.samples/src/ru/spb/rybin/ohl/v2/samples/statemachine/filetransfer/protocol.txt &#13;&#10;-outdir ${workspace_loc}/ru.spb.rybin.ohl.statemachine.generated/src/ru/spb/rybin/ohl/statemachine/generated"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="ru.spb.rybin.ohl.statemachiner"/>
+</launchConfiguration>

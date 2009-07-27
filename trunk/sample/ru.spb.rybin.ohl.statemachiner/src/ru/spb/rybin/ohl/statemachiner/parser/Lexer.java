@@ -27,7 +27,7 @@ public class Lexer {
                 throw new RuntimeException("Failed to find closing quote");
               }
               String identifier = text.substring(p + 1, p1);
-              putToken(Tokens.identifier(identifier));
+              putToken(new Tokens.identifier(identifier));
               nextP = p1 + 1;
               break nextStep;
             }
@@ -55,7 +55,7 @@ public class Lexer {
                 p1++;
               }
               String identifier = text.substring(p, p1);
-              putToken(Tokens.identifier(identifier));
+              putToken(new Tokens.identifier(identifier));
               nextP = p1;
               break nextStep;
             }
@@ -88,7 +88,7 @@ public class Lexer {
     if (pos < tokens.size()) {
       return tokens.get(pos);
     } else {
-      return TokensEof.eof(); 
+      return TokensEof.eof; 
     }
   }
   public void consume() {
@@ -109,19 +109,19 @@ public class Lexer {
   private static final Map<Character, Map<String, Tokens.case>> simpleTokens2;
   static {
     Map<String, Tokens.case> simpleTokens = new HashMap<String, Tokens.case>();
-    simpleTokens.put(">>", ConnectorTokens.toRight());
-    simpleTokens.put("<<", ConnectorTokens.toLeft());
-    simpleTokens.put("->", ConnectorTokens.toRightFork());
-    simpleTokens.put("<-", ConnectorTokens.toLeftFork());
-    simpleTokens.put("client", StateQualifier.client());
-    simpleTokens.put("server", StateQualifier.server());
-    simpleTokens.put("state", Tokens.state());
-    simpleTokens.put("(", Tokens.openParen());
-    simpleTokens.put(")", Tokens.closeParen());
-    simpleTokens.put("{", Tokens.openBrace());
-    simpleTokens.put("}", Tokens.closeBrace());
-    simpleTokens.put(",", Tokens.comma());
-    simpleTokens.put(";", Tokens.semicolon());
+    simpleTokens.put(">>", ConnectorTokens.toRight);
+    simpleTokens.put("<<", ConnectorTokens.toLeft);
+    simpleTokens.put("->", ConnectorTokens.toRightFork);
+    simpleTokens.put("<-", ConnectorTokens.toLeftFork);
+    simpleTokens.put("client", StateQualifier.client);
+    simpleTokens.put("server", StateQualifier.server);
+    simpleTokens.put("state", Tokens.state);
+    simpleTokens.put("(", Tokens.openParen);
+    simpleTokens.put(")", Tokens.closeParen);
+    simpleTokens.put("{", Tokens.openBrace);
+    simpleTokens.put("}", Tokens.closeBrace);
+    simpleTokens.put(",", Tokens.comma);
+    simpleTokens.put(";", Tokens.semicolon);
     
     simpleTokens2 = new HashMap<Character, Map<String,Tokens.case>>();
     
