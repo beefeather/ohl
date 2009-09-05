@@ -7669,22 +7669,22 @@ private void consumeOhlEnumCaseDeclaration() {
 	
 	OhlSupport.transformEnumCaseDeclaration(enumDeclaration);
 
-	//convert constructor that do not have the type's name into methods
-	boolean hasConstructor = enumDeclaration.checkConstructors(this);
-	
-	//add the default constructor when needed
-	if (!hasConstructor) {
-		boolean insideFieldInitializer = false;
-		if (this.diet) {
-			for (int i = this.nestedType; i > 0; i--){
-				if (this.variablesCounter[i] > 0) {
-					insideFieldInitializer = true;
-					break;
-				}
-			}
-		}
-		enumDeclaration.createDefaultConstructor(!this.diet || insideFieldInitializer, true);
-	}
+//	//convert constructor that do not have the type's name into methods
+//	boolean hasConstructor = enumDeclaration.checkConstructors(this);
+//	
+//	//add the default constructor when needed
+//	if (!hasConstructor) {
+//		boolean insideFieldInitializer = false;
+//		if (this.diet) {
+//			for (int i = this.nestedType; i > 0; i--){
+//				if (this.variablesCounter[i] > 0) {
+//					insideFieldInitializer = true;
+//					break;
+//				}
+//			}
+//		}
+//		enumDeclaration.createDefaultConstructor(!this.diet || insideFieldInitializer, true);
+//	}
 
 	//always add <clinit> (will be remove at code gen time if empty)
 	if (this.scanner.containsAssertKeyword) {
