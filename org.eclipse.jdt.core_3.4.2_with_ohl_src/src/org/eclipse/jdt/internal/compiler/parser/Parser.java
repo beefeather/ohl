@@ -7012,6 +7012,7 @@ private void consumeOhlSwitchLabelQualifier(boolean hasTag) {
   char [] tag;
   if (hasTag) {
     tag = identifierStack[identifierPtr--];
+    identifierLengthPtr--;
   } else {
     tag = OhlSupport.NO_TAG_IDENTIFIER;
   }
