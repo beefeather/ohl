@@ -11,13 +11,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
-import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
-import org.eclipse.jdt.internal.compiler.impl.Constant;
-import org.eclipse.jdt.internal.compiler.impl.StringConstant;
-import org.eclipse.jdt.internal.compiler.parser.OhlSupport;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.jdt.internal.compiler.util.HashtableOfObject;
 import org.eclipse.jdt.internal.compiler.util.SimpleSet;
@@ -116,53 +112,7 @@ boolean canSkipInheritedMethods(MethodBinding one, MethodBinding two) {
 void checkAbstractMethod(MethodBinding abstractMethod) {
 	if (mustImplementAbstractMethod(abstractMethod.declaringClass)) {
 		TypeDeclaration typeDeclaration = this.type.scope.referenceContext;
-	  // OHL
-		MethodBinding visitMethod = null;
-		if (CharOperation.equals(abstractMethod.declaringClass.compoundName, OhlSupport.ENUM_CASE_BASE_TOKENS)
-		    && CharOperation.equals(abstractMethod.selector, OhlSupport.ACCEPT_METHOD_SELECTOR)) {
-		  TypeBinding arg1 = abstractMethod.parameters[0];
-		  if (arg1 instanceof ReferenceBinding) {
-		    ReferenceBinding argRefBinding = (ReferenceBinding) arg1;
-        InvocationSite invocationSite = new InvocationSite() {
-          public TypeBinding[] genericTypeArguments() {
-            return null;
-          }
-          public boolean isSuperAccess() {
-            return false;
-          }
-          public boolean isTypeAccess() {
-            return false;
-          }
-          public void setActualReceiverType(ReferenceBinding receiverType) {
-          }
-          public void setDepth(int depth) {
-          }
-          public void setFieldIndex(int depth) {
-          }
-          public int sourceEnd() {
-            return 0;
-          }
-          public int sourceStart() {
-            return 0;
-          }
-        };
-		    String methodSelector = OhlSupport.VISITOR_TYPE_METHOD_PREFIX;
-		      
-        MethodBinding exactMethod = this.type.scope.getMethod(argRefBinding, methodSelector.toCharArray(),
-            new TypeBinding[] { this.type }, invocationSite);
-		    if (exactMethod != null && exactMethod.problemId() == ProblemReasons.NoError
-		        && this.type.isCompatibleWith(exactMethod.parameters[0])) {
-	        visitMethod = exactMethod;
-		    }
-		  }
-		}
-		if (visitMethod != null) {
-      SyntheticMethodBinding fineAccept = this.type.addSyntheticOhlVisitThisMethod(abstractMethod, visitMethod);
-      this.type.addSyntheticBridgeMethod(abstractMethod.original(), fineAccept);
-		} else if (typeDeclaration.allocation != null && typeDeclaration.allocation.ohlIsVisitorImpl) {
-		  // OHL
-      this.type.addSyntheticOhlMethod(abstractMethod);
-		} else if (typeDeclaration != null) {
+		if (typeDeclaration != null) {
 			MethodDeclaration missingAbstractMethod = typeDeclaration.addMissingAbstractMethodFor(abstractMethod);
 			missingAbstractMethod.scope.problemReporter().abstractMethodMustBeImplemented(this.type, abstractMethod);
 		} else {
