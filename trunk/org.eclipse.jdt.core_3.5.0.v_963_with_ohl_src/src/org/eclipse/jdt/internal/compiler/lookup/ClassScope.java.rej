@@ -1,0 +1,27 @@
+***************
+*** 65,74 ****
+  		}
+  		connectMemberTypes();
+  		buildFieldsAndMethods();
+  		anonymousType.faultInTypesForFieldsAndMethods();
+  		anonymousType.verifyMethods(environment().methodVerifier());
+  	}
+- 	
+  	void buildFields() {
+  		SourceTypeBinding sourceType = this.referenceContext.binding;
+  		if (sourceType.areFieldsInitialized()) return;
+--- 65,78 ----
+  		}
+  		connectMemberTypes();
+  		buildFieldsAndMethods();
++ 		
++ //		if (this.referenceContext.allocation.ohlIsVisitorImpl) {
++ //		  ohlBuildVisitorSynthMethods(anonymousType);
++ //		}
++ 		
+  		anonymousType.faultInTypesForFieldsAndMethods();
+  		anonymousType.verifyMethods(environment().methodVerifier());
+  	}
+  	void buildFields() {
+  		SourceTypeBinding sourceType = this.referenceContext.binding;
+  		if (sourceType.areFieldsInitialized()) return;

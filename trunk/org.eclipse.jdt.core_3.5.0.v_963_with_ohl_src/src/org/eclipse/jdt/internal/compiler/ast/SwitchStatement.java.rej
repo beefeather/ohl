@@ -1,0 +1,20 @@
+***************
+*** 32,38 ****
+  	public int caseCount;
+  	int[] constants;
+  	
+- 	// fallthrough
+  	public final static int CASE = 0;
+  	public final static int FALLTHROUGH = 1;
+  	public final static int ESCAPING = 2;
+--- 32,41 ----
+  	public int caseCount;
+  	int[] constants;
+  	
++ 	// OHL
++ 	public QualifiedAllocationExpression ohlTodoAnonymousAlloc;
++ 	
++ 	
+  	public final static int CASE = 0;
+  	public final static int FALLTHROUGH = 1;
+  	public final static int ESCAPING = 2;

@@ -1,0 +1,56 @@
+***************
+*** 11,25 ****
+  package org.eclipse.jdt.internal.compiler.ast;
+  
+  import org.eclipse.jdt.internal.compiler.ASTVisitor;
+  import org.eclipse.jdt.internal.compiler.flow.*;
+  import org.eclipse.jdt.internal.compiler.lookup.*;
+  
+  public class BreakStatement extends BranchStatement {
+  	
+  public BreakStatement(char[] label, int sourceStart, int e) {
+  	super(label, sourceStart, e);
+  }
+  
+  public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
+  
+  	// here requires to generate a sequence of finally blocks invocations depending corresponding
+--- 11,48 ----
+  package org.eclipse.jdt.internal.compiler.ast;
+  
+  import org.eclipse.jdt.internal.compiler.ASTVisitor;
++ import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
+  import org.eclipse.jdt.internal.compiler.flow.*;
+  import org.eclipse.jdt.internal.compiler.lookup.*;
+  
+  public class BreakStatement extends BranchStatement {
+  	
++ 	// OHL
++ 	// i.e. might not be reachable
++ 	public boolean ohlSynthetic;
++ 	public boolean ohlUnreacableIgnore;
++ 	
+  public BreakStatement(char[] label, int sourceStart, int e) {
+  	super(label, sourceStart, e);
+  }
+  
++ // OHL
++ public boolean complainIfUnreachable(FlowInfo flowInfo, BlockScope scope, boolean didAlreadyComplain) {
++ 	boolean res = super.complainIfUnreachable(flowInfo, scope, ohlSynthetic || didAlreadyComplain);
++ 	if (ohlSynthetic && (flowInfo.reachMode() & FlowInfo.UNREACHABLE) != 0) {
++ 		ohlUnreacableIgnore = true;
++ 	}
++ 	return res;
++ }
++ 
++ public void generateCode(BlockScope currentScope, CodeStream codeStream) {
++ 	if (ohlUnreacableIgnore) {
++ 		return;
++ 	}
++ 	super.generateCode(currentScope, codeStream);
++ }
++ 
++ 
+  public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
+  
+  	// here requires to generate a sequence of finally blocks invocations depending corresponding

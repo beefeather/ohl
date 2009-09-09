@@ -1,0 +1,50 @@
+***************
+*** 14,35 ****
+   about the parser such as the number of rules in the grammar, the starting state, etc...*/
+  public interface ParserBasicInformation {
+  
+- 	int ERROR_SYMBOL = 110,
+- 		MAX_NAME_LENGTH = 41,
+- 		NUM_STATES = 969,
+  
+- 		NT_OFFSET = 110,
+- 		SCOPE_UBOUND = 133,
+- 		SCOPE_SIZE = 134,
+- 		LA_STATE_OFFSET = 12828,
+- 		MAX_LA = 1,
+- 		NUM_RULES = 700,
+- 		NUM_TERMINALS = 110,
+- 		NUM_NON_TERMINALS = 311,
+- 		NUM_SYMBOLS = 421,
+- 		START_STATE = 731,
+- 		EOFT_SYMBOL = 68,
+- 		EOLT_SYMBOL = 68,
+- 		ACCEPT_ACTION = 12827,
+- 		ERROR_ACTION = 12828;
+  }
+--- 14,38 ----
+   about the parser such as the number of rules in the grammar, the starting state, etc...*/
+  public interface ParserBasicInformation {
+  
++     public final static int
+  
++       ERROR_SYMBOL      = 110,
++       MAX_NAME_LENGTH   = 41,
++       NUM_STATES        = 1005,
++ 
++       NT_OFFSET         = 110,
++       SCOPE_UBOUND      = 141,
++       SCOPE_SIZE        = 142,
++       LA_STATE_OFFSET   = 12909,
++       MAX_LA            = 1,
++       NUM_RULES         = 733,
++       NUM_TERMINALS     = 110,
++       NUM_NON_TERMINALS = 326,
++       NUM_SYMBOLS       = 436,
++       START_STATE       = 761,
++       EOFT_SYMBOL       = 69,
++       EOLT_SYMBOL       = 69,
++       ACCEPT_ACTION     = 12908,
++       ERROR_ACTION      = 12909;
+  }
++ 
