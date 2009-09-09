@@ -20,7 +20,13 @@ import org.eclipse.jdt.internal.compiler.lookup.*;
 public class LocalDeclaration extends AbstractVariableDeclaration {
 
 	public LocalVariableBinding binding;
-
+ 	public boolean ohlRedefineForCast;
+ 	// You can't just call "resolve" twice!                  
+ 	private TypeBinding ohlAlreadyResolvedInitializationType;
+ 	                                                         
+ 	// no unused var warning please                          
+ 	public boolean ohlCaseParameter;                         
+ 	                                                         
 	public LocalDeclaration(
 		char[] name,
 		int sourceStart,
@@ -132,6 +138,11 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		return LOCAL_VARIABLE;
 	}
 
+ 	public TypeBinding resolveRValue(BlockScope scope) {                                       
+ 		this.ohlAlreadyResolvedInitializationType = this.initialization.resolveType(scope);
+ 		return this.ohlAlreadyResolvedInitializationType;                                  
+ 	}                                                                                          
+ 	                                                                                           
 	public void resolve(BlockScope scope) {
 
 		// create a binding and add it to the scope
@@ -171,21 +182,32 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 
 		if (variableType == null) {
 			if (this.initialization != null)
-				this.initialization.resolveType(scope); // want to report all possible errors
+				if (ohlAlreadyResolvedInitializationType == null)
+				    this.initialization.resolveType(scope); // want to report all possible errors
 			return;
 		}
 
 		// store the constant for final locals
 		if (this.initialization != null) {
 			if (this.initialization instanceof ArrayInitializer) {
-				TypeBinding initializationType = this.initialization.resolveTypeExpecting(scope, variableType);
+ 				TypeBinding initializationType;                                                       
+ 				if (ohlAlreadyResolvedInitializationType == null) {                                   
+ 					initializationType = initialization.resolveTypeExpecting(scope, variableType);
+ 				} else {                                                                              
+ 					initializationType = ohlAlreadyResolvedInitializationType;                    
+ 				}                                                                                     
 				if (initializationType != null) {
 					((ArrayInitializer) this.initialization).binding = (ArrayBinding) initializationType;
 					this.initialization.computeConversion(scope, variableType, initializationType);
 				}
 			} else {
 			    this.initialization.setExpectedType(variableType);
-				TypeBinding initializationType = this.initialization.resolveType(scope);
+ 				TypeBinding initializationType;                                     
+ 				if (ohlAlreadyResolvedInitializationType == null) {                 
+ 					initializationType = this.initialization.resolveType(scope);
+ 				} else {                                                            
+ 					initializationType = ohlAlreadyResolvedInitializationType;  
+ 				}                                                                   
 				if (initializationType != null) {
 					if (variableType != initializationType) // must call before computeConversion() and typeMismatchError()
 						scope.compilationUnitScope().recordTypeConversion(variableType, initializationType);

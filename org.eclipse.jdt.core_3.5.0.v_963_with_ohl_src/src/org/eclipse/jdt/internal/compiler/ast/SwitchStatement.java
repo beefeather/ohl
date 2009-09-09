@@ -32,6 +32,10 @@ public class SwitchStatement extends Statement {
 	public int caseCount;
 	int[] constants;
 
+ 	// OHL                                                     
+ 	public QualifiedAllocationExpression ohlTodoAnonymousAlloc;
+ 	
+ 	
 	// fallthrough
 	public final static int CASE = 0;
 	public final static int FALLTHROUGH = 1;

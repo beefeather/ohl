@@ -13,12 +13,38 @@ package org.eclipse.jdt.internal.compiler.ast;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.flow.*;
 import org.eclipse.jdt.internal.compiler.lookup.*;
+import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 
 public class BreakStatement extends BranchStatement {
 
+ 	// OHL
+ 	// i.e. might not be reachable
+	public boolean ohlSynthetic;
+ 	public boolean ohlUnreacableIgnore;
+	 	
 public BreakStatement(char[] label, int sourceStart, int e) {
 	super(label, sourceStart, e);
 }
+
+// OHL                                                                                                 
+public int complainIfUnreachable(FlowInfo flowInfo, BlockScope scope, int previousComplaintLevel) {
+	if (ohlSynthetic) {
+		previousComplaintLevel = COMPLAINED_UNREACHABLE;
+	}
+	int res = super.complainIfUnreachable(flowInfo, scope, previousComplaintLevel);  
+	if (ohlSynthetic && (flowInfo.reachMode() & FlowInfo.UNREACHABLE) != 0) {                        
+		ohlUnreacableIgnore = true;                                                              
+	}                                                                                                
+	return res;                                                                                      
+}                                                                                                      
+                                                                                                       
+public void generateCode(BlockScope currentScope, CodeStream codeStream) {                             
+	if (ohlUnreacableIgnore) {                                                                       
+		return;                                                                                  
+	}                                                                                                
+	super.generateCode(currentScope, codeStream);                                                    
+}                                                                                                      
+                                                                                                       
 
 public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
 

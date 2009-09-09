@@ -68,6 +68,11 @@ public class ClassScope extends Scope {
 		}
 		connectMemberTypes();
 		buildFieldsAndMethods();
+         
+		 //		if (this.referenceContext.allocation.ohlIsVisitorImpl) {
+		 //		  ohlBuildVisitorSynthMethods(anonymousType);           
+		 //		}                                                       
+		 		                                                        
 		anonymousType.faultInTypesForFieldsAndMethods();
 		anonymousType.verifyMethods(environment().methodVerifier());
 	}

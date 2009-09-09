@@ -106,7 +106,7 @@ public void generateSyntheticBodyForOhlReturnThis(SyntheticMethodBinding methodB
 
   this.aload_1();
   this.aload_0();
-  this.invokeinterface(visitMethodBinding);
+  this.invoke(Opcodes.OPC_invokeinterface, visitMethodBinding, null /* default declaringClass */);
   ireturn();
 }
 /**

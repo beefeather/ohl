@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.core; singleton:=true
-Bundle-Version: 3.5.0.v_963
+Bundle-Version: 3.5.0.v_963_OHL_v2
 Bundle-ClassPath: org.eclipse.jdt.core_3.5.0.v_963.jar
 Bundle-Activator: org.eclipse.jdt.core.JavaCore
 Bundle-Vendor: %providerName
