@@ -1,0 +1,99 @@
+***************
+*** 21,26 ****
+  
+  	public LocalVariableBinding binding;
+  	
+  	public LocalDeclaration(
+  		char[] name,
+  		int sourceStart,
+--- 21,34 ----
+  
+  	public LocalVariableBinding binding;
+  	
++ 	public boolean ohlRedefineForCast;
++ 	
++ 	// You can't just call "resolve" twice!
++ 	private TypeBinding ohlAlreadyResolvedInitializationType;
++ 	
++ 	// no unused var warning please
++ 	public boolean ohlCaseParameter;
++ 	
+  	public LocalDeclaration(
+  		char[] name,
+  		int sourceStart,
+***************
+*** 132,137 ****
+  		return LOCAL_VARIABLE;
+  	}
+  	
+  	public void resolve(BlockScope scope) {
+  
+  		// create a binding and add it to the scope
+--- 140,150 ----
+  		return LOCAL_VARIABLE;
+  	}
+  	
++ 	public TypeBinding resolveRValue(BlockScope scope) {
++ 		this.ohlAlreadyResolvedInitializationType = this.initialization.resolveType(scope);
++ 		return this.ohlAlreadyResolvedInitializationType;
++ 	}
++ 	
+  	public void resolve(BlockScope scope) {
+  
+  		// create a binding and add it to the scope
+***************
+*** 169,189 ****
+  
+  		if (variableType == null) {
+  			if (initialization != null)
+- 				initialization.resolveType(scope); // want to report all possible errors
+  			return;
+  		}
+  
+  		// store the constant for final locals 	
+  		if (initialization != null) {
+  			if (initialization instanceof ArrayInitializer) {
+- 				TypeBinding initializationType = initialization.resolveTypeExpecting(scope, variableType);
+  				if (initializationType != null) {
+  					((ArrayInitializer) initialization).binding = (ArrayBinding) initializationType;
+  					initialization.computeConversion(scope, variableType, initializationType);
+  				}
+  			} else {
+  			    this.initialization.setExpectedType(variableType);
+- 				TypeBinding initializationType = this.initialization.resolveType(scope);
+  				if (initializationType != null) {
+  					if (variableType != initializationType) // must call before computeConversion() and typeMismatchError()
+  						scope.compilationUnitScope().recordTypeConversion(variableType, initializationType);
+--- 184,215 ----
+  
+  		if (variableType == null) {
+  			if (initialization != null)
++ 				if (ohlAlreadyResolvedInitializationType == null)
++ 				  initialization.resolveType(scope); // want to report all possible errors
+  			return;
+  		}
+  
+  		// store the constant for final locals 	
+  		if (initialization != null) {
+  			if (initialization instanceof ArrayInitializer) {
++ 				TypeBinding initializationType;
++ 				if (ohlAlreadyResolvedInitializationType == null) {
++ 					initializationType = initialization.resolveTypeExpecting(scope, variableType);
++ 				} else {
++ 					initializationType = ohlAlreadyResolvedInitializationType;
++ 				}
+  				if (initializationType != null) {
+  					((ArrayInitializer) initialization).binding = (ArrayBinding) initializationType;
+  					initialization.computeConversion(scope, variableType, initializationType);
+  				}
+  			} else {
+  			    this.initialization.setExpectedType(variableType);
++ 				TypeBinding initializationType;
++ 				if (ohlAlreadyResolvedInitializationType == null) {
++ 					initializationType = this.initialization.resolveType(scope);
++ 				} else {
++ 					initializationType = ohlAlreadyResolvedInitializationType;
++ 				}
+  				if (initializationType != null) {
+  					if (variableType != initializationType) // must call before computeConversion() and typeMismatchError()
+  						scope.compilationUnitScope().recordTypeConversion(variableType, initializationType);
