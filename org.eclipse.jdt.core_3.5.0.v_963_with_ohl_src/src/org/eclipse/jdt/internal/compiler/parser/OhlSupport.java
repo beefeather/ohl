@@ -455,7 +455,7 @@ public class OhlSupport {
     alloc.anonymousType = anonymousType;
     anonymousType.allocation = alloc;
     
-    SingleTypeReference anonClassTypeRef = new SingleTypeReference("<not specified>".toCharArray(), 0);
+    SingleTypeReference anonClassTypeRef = new SingleTypeReference("FakeOhlBaseClass".toCharArray(), 0);
     alloc.type = anonClassTypeRef;
     alloc.statementEnd = -1;
     switchStatement.ohlTodoAnonymousAlloc = alloc;
