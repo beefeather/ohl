@@ -34,7 +34,10 @@ public int complainIfUnreachable(FlowInfo flowInfo, BlockScope scope, int previo
 	int res = super.complainIfUnreachable(flowInfo, scope, previousComplaintLevel);  
 	if (ohlSynthetic && (flowInfo.reachMode() & FlowInfo.UNREACHABLE) != 0) {                        
 		ohlUnreacableIgnore = true;                                                              
-	}                                                                                                
+	}                   
+	if (ohlSynthetic){
+		return NOT_COMPLAINED;
+	}
 	return res;                                                                                      
 }                                                                                                      
                                                                                                        
