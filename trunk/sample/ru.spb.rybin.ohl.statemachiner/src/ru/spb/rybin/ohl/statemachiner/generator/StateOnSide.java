@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ru.spb.rybin.ohl.statemachiner.parser.ast.FormalParameter;
 import ru.spb.rybin.ohl.statemachiner.parser.ast.StateDefinition;
 import ru.spb.rybin.ohl.statemachiner.parser.ast.Transition;
 import ru.spb.rybin.ohl.statemachiner.parser.ast.TransitionData;
@@ -88,13 +89,26 @@ public class StateOnSide {
       if (comingBack.isEmpty()) {
         returnType = EdgeReturn.Type.void_type;
       } else if (comingBack.size() == 1) {
-        TransitionData transitionData = comingBack.iterator().next().getTransition().getTransitionData();
+        final Transition transition = comingBack.iterator().next().getTransition();
+        TransitionData transitionData = transition.getTransitionData();
         if (transitionData == null) {
           returnType = new EdgeReturn.Direct();
         } else if (transitionData.getParamters().isEmpty()) {
           returnType = new EdgeReturn.Direct();
         } else {
-          returnType = new EdgeReturn.Struct();
+          List<FormalParameter> fields = new ArrayList<FormalParameter>();
+          fields.addAll(transitionData.getParamters());
+          fields.add(new FormalParameter() {
+            @Override
+            public String getName() {
+              return "nextStep";
+            }
+            @Override
+            public String getTypeName() {
+              return transition.getTo().getState().getName();
+            }
+          });
+          returnType = new EdgeReturn.Struct(fields);
         }
       } else {
         returnType = new EdgeReturn.EnumCase();

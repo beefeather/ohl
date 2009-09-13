@@ -1,26 +1,4 @@
-client Init  >> server LogoScreen;
-client EnterPassword << (String message) << server LogoScreen;
-client EnterPassword >> (String login, String password) >> server CheckPassword;
-client WrongAccount << loginProblem(String loginProblem, String passwordProblem) <- server CheckPassword;
-client WrongAccount >> client Init;
-client MainMenu << loginOk() <- server CheckPassword;
-client MainMenu -> deleteFile(String name) >> server SimpleFileOperation;
-client MainMenu -> renameFile(String name, String newName) >> server SimpleFileOperation;
-
-state FileOperationProblem >> MainMenu {
-  String errorMessage;
-}
-
-client FileOperationProblem << problem() <- server SimpleFileOperation;
-client FileOperationDone << done() <- server SimpleFileOperation;
-client FileOperationDone >> client MainMenu;
-client MainMenu -> uploadFile(String name) >> server UploadFileOperation;
-client FileOperationProblem << problem() <- server UploadFileOperation;
-client FileUploadProcess << ok() <- server UploadFileOperation;
-client FileUploadProcess -> nextChunk("byte []" chunk) >> server ReceiveNextChunk;
-client FileUploadProcess << roger() <- server ReceiveNextChunk;
-client FileOperationProblem << problem(String message) <- server ReceiveNextChunk;
-client FileUploadProcess -> closeStream() >> server UploadStreamClosed;
-client FileOperationProblem << problem(String message) <- server UploadStreamClosed;
-client FileOperationDone << done() <- server UploadStreamClosed;
-client MainMenu -> finish() >> server Stop;
+client Init >> (int p1) >> server LogoScreen;
+client Middle << (int p2) << server LogoScreen;
+client Middle >> (int p3) >> server ByeScreen;
+client Stop << (int p4) << server ByeScreen;

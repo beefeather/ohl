@@ -64,8 +64,23 @@ class SideInterfaceGenerator {
         switch (edge.getEdgeReturn()) {
           case * void_type() {
           }
-          case instanceof EdgeReturn.Struct {
-            javaSource.println("class " + EdgeReturn.Struct.getStructName(edge) + "{");
+          case instanceof EdgeReturn.Struct struct1 {
+            String name = EdgeReturn.Struct.getStructName(edge);
+            javaSource.println("class " + name + " {");
+            javaSource.indent();
+            javaSource.print("public " + name + "(");
+            printParams(struct1.getParameters());
+            javaSource.endline(") {");
+            javaSource.indent();
+            for (FormalParameter p : struct1.getParameters()) {
+              javaSource.println("this." + p.getName() + " = " + p.getName() + ";");
+            }
+            javaSource.indentBack();
+            javaSource.println("}");
+            for (FormalParameter p : struct1.getParameters()) {
+              javaSource.println("public final " + p.getTypeName() + " " + p.getName() + ";");
+            }
+            javaSource.indentBack();
             javaSource.println("}");
           }
           case instanceof EdgeReturn.Direct {
@@ -135,7 +150,7 @@ class SideInterfaceGenerator {
     }
   }
   
-  private void printParams(List<FormalParameter> params) {
+  private void printParams(List<? extends FormalParameter> params) {
     if (params.size() > 1) {
       javaSource.endline("");
       javaSource.indent();

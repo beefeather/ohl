@@ -114,7 +114,7 @@ public class SideImplGenerator {
       javaSource.println(holderType + " nextResult = ");
       javaSource.println("    new " + holderType + "();");
 
-      javaSource.print("returnHolder.setValue(OutgoingData." + methodName + "(");
+      javaSource.print("returnHolder.setValue(new OutgoingData." + methodName + "(");
       if (tr.getTransitionData() != null) {
         List<FormalParameter> params = tr.getTransitionData().getParamters();
         for (FormalParameter p1 : params) {

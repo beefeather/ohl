@@ -1,5 +1,9 @@
 package ru.spb.rybin.ohl.statemachiner.generator;
 
+import java.util.List;
+
+import ru.spb.rybin.ohl.statemachiner.parser.ast.FormalParameter;
+
 public interface EdgeReturn {
   enum-case Type {
     case void_type(),
@@ -12,6 +16,15 @@ public interface EdgeReturn {
   }
   
   class Struct implements case {
+    Struct(List<? extends FormalParameter> parameters) {
+      this.parameters = parameters;
+    }
+    
+    private final List<? extends FormalParameter> parameters;
+    
+    public List<? extends FormalParameter> getParameters() {
+      return parameters;
+    }
     static String getStructName(Edge edge) {
       return GeneratorUtil.camelCat("ReturnStruct", edge.getResolvedName()); 
     }

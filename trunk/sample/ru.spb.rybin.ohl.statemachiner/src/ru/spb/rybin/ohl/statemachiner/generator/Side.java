@@ -37,6 +37,11 @@ class Side {
       st.analyze();
     }
   } 
+  
+  @Override
+  public String toString() {
+    return name;
+  }
 
   private final String name;
   private final StateRepository stateRepositiory;
