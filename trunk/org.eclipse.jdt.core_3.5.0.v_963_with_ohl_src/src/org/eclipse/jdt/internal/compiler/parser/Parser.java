@@ -211,7 +211,7 @@ public class Parser implements  ParserBasicInformation, TerminalTokens, Operator
 		try{
 			initTables();
 		} catch(java.io.IOException ex){
-			throw new ExceptionInInitializerError(ex.getMessage());
+			throw new ExceptionInInitializerError(ex);
 		}
 	}
 	public static int asi(int state) {
@@ -5220,7 +5220,7 @@ protected void consumeRightParen() {
 	// PushRPAREN ::= ')'
 	pushOnIntStack(this.rParenPos);
 }
-// This method is part of an automatic generation : do NOT edit-modify  
+//This method is part of an automatic generation : do NOT edit-modify  
 protected void consumeRule(int act) {
   switch ( act ) {
     case 30 : if (DEBUG) { System.out.println("Type ::= PrimitiveType"); }  //$NON-NLS-1$
@@ -6901,9 +6901,104 @@ protected void consumeRule(int act) {
 		    consumeMethodHeader();  
 			break;
  
+    case 708 : if (DEBUG) { System.out.println("BlockStatement ::= OhlEnumCaseDeclaration"); }  //$NON-NLS-1$
+		    consumeInvalidOhlEnumCaseDeclaration();  
+			break;
+ 
+     case 709 : if (DEBUG) { System.out.println("OhlEnumCaseDeclaration ::= OhlEnumCaseHeader..."); }  //$NON-NLS-1$
+		    consumeOhlEnumCaseDeclaration();  
+			break;
+ 
+     case 710 : if (DEBUG) { System.out.println("OhlEnumCaseHeader ::= OhlEnumCaseHeaderName..."); }  //$NON-NLS-1$
+		    consumeOhlEnumCaseHeader();  
+			break;
+ 
+    case 711 : if (DEBUG) { System.out.println("OhlEnumCaseHeaderName ::= OhlEnumCaseHeaderName1..."); }  //$NON-NLS-1$
+		    consumeOhlEnumCaseHeaderNameWithTypeParameters();  
+			break;
+ 
+     case 713 : if (DEBUG) { System.out.println("OhlEnumCaseHeaderName1 ::= Modifiersopt enum MINUS case"); }  //$NON-NLS-1$
+		    consumeOhlEnumCaseHeaderName();  
+			break;
+ 
+     case 714 : if (DEBUG) { System.out.println("OhlEnumCaseBody ::= LBRACE OhlEnumCaseConstants RBRACE"); }  //$NON-NLS-1$
+		    consumeOhlEnumCaseBodyWithConstants();  
+			break;
+ 
+     case 715 : if (DEBUG) { System.out.println("OhlEnumCaseBody ::= LBRACE RBRACE"); }  //$NON-NLS-1$
+		    consumeOhlEnumCaseEmptyBody();  
+			break;
+ 
+    case 717 : if (DEBUG) { System.out.println("OhlEnumCaseConstants ::= OhlEnumCaseConstants COMMA..."); }  //$NON-NLS-1$
+		    consumeOhlEnumCaseConstants();  
+			break;
+ 
+    case 720 : if (DEBUG) { System.out.println("OhlEnumCaseStructConstantHeaderName ::= case Identifier"); }  //$NON-NLS-1$
+		    consumeOhlEnumCaseConstantHeaderNameWithTag();  
+			break;
+ 
+    case 721 : if (DEBUG) { System.out.println("OhlEnumCaseStructConstantHeaderName ::= case LPAREN"); }  //$NON-NLS-1$
+		    consumeOhlEnumCaseConstantHeaderName();  
+			break;
+ 
+    case 722 : if (DEBUG) { System.out.println("OhlEnumCaseStructConstantHeader ::=..."); }  //$NON-NLS-1$
+		    consumeOhlEnumCaseStructConstantHeader();  
+			break;
+ 
+    case 723 : if (DEBUG) { System.out.println("OhlEnumCaseStructConstantHeaderRightParen ::= RPAREN"); }  //$NON-NLS-1$
+		    consumeOhlEnumCaseStructConstantHeaderRightParen ();  
+			break;
+ 
+    case 724 : if (DEBUG) { System.out.println("OhlEnumCaseStructConstant ::=..."); }  //$NON-NLS-1$
+		    consumeOhlEnumCaseStructConstant();  
+			break;
+ 
+    case 725 : if (DEBUG) { System.out.println("OhlEnumCaseTypeConstant ::= ReferenceType"); }  //$NON-NLS-1$
+		    consumeOhlEnumCaseTypeConstant();  
+			break;
+ 
+    case 726 : if (DEBUG) { System.out.println("OhlEnumCaseTypeConstant ::= ReferenceType Identifier"); }  //$NON-NLS-1$
+		    consumeOhlEnumCaseTypeConstantWithTag();  
+			break;
+ 
+    case 727 : if (DEBUG) { System.out.println("OhlInterfaceType ::= ClassOrInterfaceType"); }  //$NON-NLS-1$
+		    consumeInterfaceType();  
+			break;
+ 
+    case 728 : if (DEBUG) { System.out.println("OhlInterfaceType ::= case"); }  //$NON-NLS-1$
+		    consumeOhlEnumCaseImplements();  
+			break;
+ 
+     case 729 : if (DEBUG) { System.out.println("SwitchLabel ::= case MULTIPLY Identifier LPAREN..."); }  //$NON-NLS-1$
+		    consumeOhlSwitchStructLabel();  
+			break;
+ 
+     case 730 : if (DEBUG) { System.out.println("SwitchLabel ::= case OhlSwitchLabelQualifier LBRACE..."); }  //$NON-NLS-1$
+		    consumeOhlSwitchTypeLabel();  
+			break;
+ 
+     case 731 : if (DEBUG) { System.out.println("OhlSwitchLabelQualifier ::= instanceof ReferenceType..."); }  //$NON-NLS-1$
+		    consumeOhlSwitchLabelQualifier(true);  
+			break;
+ 
+     case 732 : if (DEBUG) { System.out.println("OhlSwitchLabelQualifier ::= instanceof ReferenceType"); }  //$NON-NLS-1$
+		    consumeOhlSwitchLabelQualifier(false);  
+			break;
+ 
+     case 733 : if (DEBUG) { System.out.println("SwitchLabel ::= default MULTIPLY LBRACE..."); }  //$NON-NLS-1$
+		    consumeOhlSwitchDefault();  
+			break;
+ 
+    case 735 : if (DEBUG) { System.out.println("OhlCaseType ::= Name DOT case"); }  //$NON-NLS-1$
+		    consumeOhlCaseType();   
+			break;
+ 
+    case 736 : if (DEBUG) { System.out.println("OhlCaseType ::= GenericType DOT case"); }  //$NON-NLS-1$
+		    consumeOhlCaseGenericType();   
+			break;
+ 
 	}
 }
-
 
 
 private void consumeOhlSwitchLabelQualifier(boolean hasTag) {
