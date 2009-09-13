@@ -1,12 +1,18 @@
 package ru.spb.rybin.ohl.v2.samples.expressionparser;
 
+import ru.spb.rybin.ohl.v2.samples.expressionparser.Lexer.TokensEx;
+
 public class Parser {
   public Parser(Lexer lexer) {
 	  this.lexer = lexer;
   }
   
   AstNode parse() throws ParserException {
-	  return parseExpression();
+    AstNode result = parseExpression(); 
+    if (lexer.peek() != TokensEx.eos) {
+      throw new ParserException("EOS expected");
+    }
+	  return result;
   }
   private AstNode parseExpression() throws ParserException {
 	  final AstNode left = parseTerminal();
@@ -14,10 +20,10 @@ public class Parser {
 
 	  switch (lexer.peek()) {
   	  case * plus() {
-  	    operation = AstBinaryOperation.Operation.plus();
+  	    operation = AstBinaryOperation.Operation.plus;
   	  }
   	  case * minus() {
-        operation = AstBinaryOperation.Operation.minus();
+        operation = AstBinaryOperation.Operation.minus;
   	  }
   	  default * {
   		  return left;
@@ -48,7 +54,7 @@ public class Parser {
   	  case * paren_open() {
   		 lexer.consume();
   		 AstNode inner = parseExpression();
-  		 if (lexer.peek() != Lexer.Tokens.paren_close()) {
+  		 if (lexer.peek() != Lexer.Tokens.paren_close) {
       	 throw new ParserException("')' expected");
   		 }
   		 lexer.consume();
@@ -98,4 +104,4 @@ public class Parser {
   		super(cause);
   	}
   }
-}
+} 
