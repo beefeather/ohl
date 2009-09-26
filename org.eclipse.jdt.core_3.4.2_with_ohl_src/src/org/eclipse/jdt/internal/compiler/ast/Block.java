@@ -150,7 +150,7 @@ public class Block extends Statement {
 				if (visitorType == null) {
 				  switchSt.ohlTodoAnonymousAlloc.type = new SingleTypeReference("unknown_type".toCharArray(), 0);
 				} else {
-    				switchSt.ohlTodoAnonymousAlloc.type = binding2typeRef(visitorType);
+    	    switchSt.ohlTodoAnonymousAlloc.type = binding2typeRef(visitorType);
 				}
 
 				for (int i=0; i<switchSt.ohlCaseBlocks.length; i++) {
