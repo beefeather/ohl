@@ -1,12 +1,11 @@
-#summary One-sentence summary of this page.
-
 = How to Try Out =
 
   # Install Eclipse SDK 3.4.1 or 3.5.0.
-  # Download the corresponding patch file (one with matching version)
+  # Install SVN Eclipse integration from http://subversion.tigris.org/ to be able to download samples later.
+  # Download the ohl patch jar file (one with matching version) from "Downloads"
   # Run Eclipse as
 {{{
-Eclipse.exe -dev <jdt_patch_with_ohl_name>.jar
+Eclipse.exe -dev patch_file_name.jar
 }}}
-  # In the running Eclipse import java projects into your workspace from http://ohl.googlecode.com/svn/trunk/samples/ru.spb.rybin.ohl.v2.samples SVN URL. It should be a sample project and ohl_rt library project. One depends on another.
+  # In the running Eclipse import java projects into your workspace from https://ohl.googlecode.com/svn/trunk/samples SVN URL. It should be a sample project and ohl_rt library project. One depends on another.
   # Try to play with it. Feel free to write me if you have thoughts or there are problems.
