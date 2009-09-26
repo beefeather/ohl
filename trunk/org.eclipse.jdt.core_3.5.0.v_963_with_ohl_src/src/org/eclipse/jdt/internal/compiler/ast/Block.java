@@ -98,6 +98,9 @@ public void resolve(BlockScope upperScope) {
 			if (this.ohlIsSynSwitchBlock) {
 				LocalDeclaration declSt = (LocalDeclaration) this.statements[0];
 				TypeBinding exprType = declSt.resolveRValue(scope);
+
+				SwitchStatement switchStatement = (SwitchStatement) this.statements[1];
+      	        int switchStatementExpressionPos = switchStatement.sourceStart;
 				
 				char[] finalVarName = null;
 				if (declSt.initialization instanceof SingleNameReference) {
@@ -111,13 +114,21 @@ public void resolve(BlockScope upperScope) {
 				}
 				
 				if (exprType != null) {
-	        declSt.type = binding2typeRef(exprType); 
+	               declSt.type = binding2typeRef(exprType, switchStatementExpressionPos); 
 				}
 
  		    // ru.spb.rybin.ohl.lang.EnumCaseBase<? super Visitor>
       	char [][] enum_case_base_tokens = OhlSupport.ENUM_CASE_BASE_TOKENS;
+      	
+      	        
 		    	
 				TypeBinding visitorType = null;
+				if (exprType instanceof TypeVariableBinding) {
+					TypeVariableBinding typeAsVariable = (TypeVariableBinding) exprType;
+					if (typeAsVariable.boundsCount() == 1) {
+						exprType = typeAsVariable.firstBound;
+					}
+				}
 				if (exprType instanceof ParameterizedTypeBinding) {
 					ParameterizedTypeBinding parameterizedTypeBinding = (ParameterizedTypeBinding) exprType;
 					if (CharOperation.equals(enum_case_base_tokens, parameterizedTypeBinding.compoundName)) {
@@ -129,6 +140,11 @@ public void resolve(BlockScope upperScope) {
 							    		 visitorType = binding.wildcard.bound;
 							    	 }
 							     }
+							} else if (parameterizedTypeBinding.arguments[0] instanceof WildcardBinding) {
+								WildcardBinding binding = (WildcardBinding) parameterizedTypeBinding.arguments[0];
+						    	 if (binding.boundKind == Wildcard.SUPER) {
+						    		 visitorType = binding.bound;
+						    	 }
 							}
 						}
 					}
@@ -139,7 +155,7 @@ public void resolve(BlockScope upperScope) {
 				if (visitorType == null) {
 				  switchSt.ohlTodoAnonymousAlloc.type = new SingleTypeReference("unknown_type".toCharArray(), 0);
 				} else {
-    				switchSt.ohlTodoAnonymousAlloc.type = binding2typeRef(visitorType);
+    				switchSt.ohlTodoAnonymousAlloc.type = binding2typeRef(visitorType, switchStatementExpressionPos);
 				}
 
 				for (int i=0; i<switchSt.ohlCaseBlocks.length; i++) {
@@ -160,7 +176,7 @@ public void resolve(BlockScope upperScope) {
           } break;
           case CaseStatement.OHL_STRUCT_CASE: {
             final char[] selector = ((SingleTypeReference)decl1.type).token;
-            final TypeReference typeRef = binding2typeRef(visitorType);
+            final TypeReference typeRef = binding2typeRef(visitorType, 0);
             //visitorType.
             
             // We prefer not to reuse AST elements and create anew each time.
@@ -229,7 +245,7 @@ public void resolve(BlockScope upperScope) {
 }
 
 
-	private static TypeReference binding2typeRef(TypeBinding typeBinding) {
+	private static TypeReference binding2typeRef(TypeBinding typeBinding, int sourceBegin) {
 	  if (typeBinding == null) {
 	    return null;
 	  }
@@ -237,7 +253,7 @@ public void resolve(BlockScope upperScope) {
 			CaptureBinding captureBinding = (CaptureBinding) typeBinding;
 			if (captureBinding.wildcard != null) {
 				Wildcard res = new Wildcard(captureBinding.wildcard.boundKind);
-				res.bound = binding2typeRef(captureBinding.wildcard.bound);
+				res.bound = binding2typeRef(captureBinding.wildcard.bound, sourceBegin);
 				return res;
 			}
 			throw new RuntimeException();
@@ -250,9 +266,20 @@ public void resolve(BlockScope upperScope) {
 		char[] fullName = typeBinding.qualifiedSourceName();
 		char [] packageName = typeBinding.qualifiedPackageName();
 		String [] classNameInParts = new String(fullName).split("\\.");
-		String [] packageNameInParts = new String(packageName).split("\\.");
+		String [] packageNameInParts;
+		if (packageName.length == 0) {
+			packageNameInParts = new String[0];
+		} else {
+			packageNameInParts = new String(packageName).split("\\.");
+		}
 		char [] [] tokens = new char[packageNameInParts.length + classNameInParts.length] [];
 		long [] pos = new long[packageNameInParts.length + classNameInParts.length];
+		{
+			for (int i = 0; i < pos.length; i++) {
+				long posLong = (sourceBegin + i) << 32 | sourceBegin + i + 1;
+				pos[i] = posLong;
+			}
+		}
 		for (int i=0; i<packageNameInParts.length; i++) {
 			tokens[i] = packageNameInParts[i].toCharArray();
 		}
@@ -264,12 +291,12 @@ public void resolve(BlockScope upperScope) {
 			ParameterizedTypeBinding genericType = (ParameterizedTypeBinding)typeBinding;
 			TypeReference [] [] genericParams = new TypeReference[tokens.length][];
 			if (genericType.arguments != null) {
-  			TypeReference [] lastComponentParams = new TypeReference[genericType.arguments.length];
-  			genericParams[genericParams.length-1] = lastComponentParams;
-  			
-  			for (int i=0; i<lastComponentParams.length; i++) {
-  				lastComponentParams[i] = binding2typeRef(genericType.arguments[i]);
-  			}
+	  			TypeReference [] lastComponentParams = new TypeReference[genericType.arguments.length];
+	  			genericParams[genericParams.length-1] = lastComponentParams;
+	  			
+	  			for (int i=0; i<lastComponentParams.length; i++) {
+	  				lastComponentParams[i] = binding2typeRef(genericType.arguments[i], sourceBegin);
+	  			}
 			}
 			ParameterizedQualifiedTypeReference res = 
 				new ParameterizedQualifiedTypeReference(tokens, genericParams, 0, pos);
