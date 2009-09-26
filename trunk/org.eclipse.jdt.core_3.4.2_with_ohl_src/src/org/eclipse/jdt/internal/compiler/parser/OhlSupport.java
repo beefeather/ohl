@@ -453,6 +453,8 @@ public class OhlSupport {
     
     QualifiedAllocationExpression alloc = new QualifiedAllocationExpression(anonymousType);
     alloc.anonymousType = anonymousType;
+    alloc.sourceStart = declSt.initialization.sourceStart;
+    alloc.sourceEnd = declSt.initialization.sourceEnd;    
     anonymousType.allocation = alloc;
     
     SingleTypeReference anonClassTypeRef = new SingleTypeReference("<not specified>".toCharArray(), 0);
