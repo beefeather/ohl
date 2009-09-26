@@ -1,6 +1,6 @@
 = How to Try Out =
 
-  # Install Eclipse SDK 3.4.1 or 3.5.0.
+  # Install Eclipse SDK 3.4.2 or 3.5.0.
   # Install SVN Eclipse integration from http://subversion.tigris.org/ to be able to download samples later.
   # Download the ohl patch jar file (one with matching version) from "Downloads"
   # Run Eclipse as
