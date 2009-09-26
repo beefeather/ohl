@@ -171,7 +171,7 @@ public class Block extends Statement {
           } break;
           case CaseStatement.OHL_STRUCT_CASE: {
             final char[] selector = ((SingleTypeReference)decl1.type).token;
-            final QualifiedTypeReference typeRef = (QualifiedTypeReference) binding2typeRef(visitorType);
+            final TypeReference typeRef = binding2typeRef(visitorType);
             //visitorType.
             
             // We prefer not to reuse AST elements and create anew each time.
