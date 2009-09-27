@@ -1,4 +1,4 @@
-package ru.spb.rybin.ohl.v2.samples.simple.javatype;
+package ru.spb.rybin.ohl.v3.samples.simple.javatype;
 
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;

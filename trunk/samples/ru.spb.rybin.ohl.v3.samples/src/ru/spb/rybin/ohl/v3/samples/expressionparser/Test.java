@@ -1,10 +1,10 @@
-package ru.spb.rybin.ohl.v2.samples.expressionparser;
+package ru.spb.rybin.ohl.v3.samples.expressionparser;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import ru.spb.rybin.ohl.v2.samples.expressionparser.Parser.ParserException;
+import ru.spb.rybin.ohl.v3.samples.expressionparser.Parser.ParserException;
 
 public class Test {
 	public static void main(String[] args) throws ParserException {

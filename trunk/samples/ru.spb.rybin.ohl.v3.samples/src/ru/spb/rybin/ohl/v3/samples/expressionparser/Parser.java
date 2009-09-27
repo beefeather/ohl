@@ -1,6 +1,6 @@
-package ru.spb.rybin.ohl.v2.samples.expressionparser;
+package ru.spb.rybin.ohl.v3.samples.expressionparser;
 
-import ru.spb.rybin.ohl.v2.samples.expressionparser.Lexer.TokensEx;
+import ru.spb.rybin.ohl.v3.samples.expressionparser.Lexer.TokensEx;
 
 public class Parser {
   public Parser(Lexer lexer) {
