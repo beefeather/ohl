@@ -132,7 +132,7 @@ public void resolve(BlockScope upperScope) {
 				if (exprType instanceof ParameterizedTypeBinding) {
 					ParameterizedTypeBinding parameterizedTypeBinding = (ParameterizedTypeBinding) exprType;
 					if (CharOperation.equals(enum_case_base_tokens, parameterizedTypeBinding.compoundName)) {
-						if (parameterizedTypeBinding.arguments.length==1) {
+						if (parameterizedTypeBinding.arguments != null && parameterizedTypeBinding.arguments.length==1) {
 							if (parameterizedTypeBinding.arguments[0] instanceof CaptureBinding) {
 							     CaptureBinding binding = (CaptureBinding) parameterizedTypeBinding.arguments[0];
 							     if (binding.wildcard != null) {
