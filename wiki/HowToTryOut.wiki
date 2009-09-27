@@ -8,4 +8,7 @@
 Eclipse.exe -dev patch_file_name.jar
 }}}
   # In the running Eclipse import java projects into your workspace from https://ohl.googlecode.com/svn/trunk/samples SVN URL. It should be a sample project and ohl_rt library project. One depends on another.
-  # Try to play with it. Feel free to write me if you have thoughts or there are problems.
+  # Try to play with it.
+  # Try basic features TBD(enum-case declaration, switch operator).
+  # Try advanced features: extension, [LangTypeParam generic type], [LangVariance variance]
+  # Feel free to write me if you have thoughts or there are problems.
