@@ -2314,7 +2314,11 @@ class ASTConverter {
 		}
 		if (allocation.anonymousType != null) {
 			int declarationSourceStart = allocation.sourceStart;
-			classInstanceCreation.setSourceRange(declarationSourceStart, allocation.anonymousType.bodyEnd - declarationSourceStart + 1);
+			
+			// OHL
+			if (allocation.anonymousType.bodyEnd - declarationSourceStart + 1 >= 0) {
+			  classInstanceCreation.setSourceRange(declarationSourceStart, allocation.anonymousType.bodyEnd - declarationSourceStart + 1);
+			}
 			final AnonymousClassDeclaration anonymousClassDeclaration = new AnonymousClassDeclaration(this.ast);
 			int start = retrieveStartBlockPosition(allocation.anonymousType.sourceEnd, allocation.anonymousType.bodyEnd);
 			// OHL
