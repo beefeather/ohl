@@ -1,4 +1,4 @@
-package ru.spb.rybin.ohl.v2.samples.simple;
+package ru.spb.rybin.ohl.v3.samples.simple;
 
 public class Simple {
   static class A implements case {
