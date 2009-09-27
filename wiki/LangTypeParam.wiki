@@ -1,4 +1,4 @@
-#How to use enum-case as a type param
+#summary How to use enum-case as a type param
 
 = Enum-case as a generic type parameter =
 
@@ -24,4 +24,4 @@ CaseHolder<FewOptions> holder = new CaseHolder<FewOptions>();
 holder.caseInstance = FewOptions.doNothing;
 }}}
 
-This is more a matter of taste which variant to use. However, it makes a real difference if you should need a variance.
+This is more a matter of taste which variant to use. However, it makes a real difference if you should need a [LangVariance variance].
