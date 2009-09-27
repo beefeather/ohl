@@ -21,7 +21,7 @@ and a method with generic parameter T
 }}}
 You may need 2 different kinds of a bound for this parameter.
 
-===Enum-case not wider that===
+===Enum-case not wider than===
 If you limit your enum-case type this way, you may switch on its value (because you know all possible cases).
 {{{
 <T extends ManyOptions.case> T validateOption(T option) {
@@ -40,7 +40,7 @@ If you limit your enum-case type this way, you may switch on its value (because 
 }
 }}}
 
-===Enum-case not narrower that===
+===Enum-case not narrower than===
 This makes sense if you need to return some particular case without fixing method's return type to any particular type.
 {{{
 <P extends FewOptions> P.case validateOption(P.case option) {
