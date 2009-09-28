@@ -9,6 +9,6 @@ Eclipse.exe -dev patch_file_name.jar
 }}}
   # In the running Eclipse import java projects into your workspace from https://ohl.googlecode.com/svn/trunk/samples SVN URL. It should be a sample project and ohl_rt library project. One depends on another.
   # Try to play with it.
-  # Try basic features [LangEnumCase enum-case declaration], [LangSwitch switch operator], [LangEnumCase generic enum-cases], [LangUserType user types] and [LangTuple tuples].
+  # Try basic features: [LangEnumCase enum-case declaration], [LangSwitch switch operator], [LangEnumCase generic enum-cases], [LangUserType user types] and [LangTuple tuples].
   # Try advanced features: [LangEnumCaseExtends enum-case extension], [LangTypeParam enum-case as a generic type], [LangVariance variance], [LangReflection reflection].
   # Feel free to write me if you have thoughts or there are problems.
