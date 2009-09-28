@@ -41,7 +41,7 @@ enum-case RecognizedPets {
 Both kinds of cases (user types and tuples) are intermixable. See more details about tuples (TBD).
 You may notice here, that user types may be used in any number of enum-cases.
 
-One enum-case (as a set of cases) may extend several other enum-cases (TBD), generating related types.
+One enum-case (as a set of cases) may [LangEnumCaseExtends extend] several other enum-cases, generating related types.
 
 ===Generics===
 Enum-case may be a generic type:
