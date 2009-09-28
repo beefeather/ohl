@@ -17,7 +17,7 @@ enum-case Animals {
 }
 }}}
 This declaration defines a new type: _Animals.case_ (i.e. type name must have a special suffix ".case"; technically speaking there is also type _Animals_, but it is not really used).
-_Cat_, _Dog_ and _Capybara_ are all regular user types; however these user types must have a [UserType special mark-up].
+_Cat_, _Dog_ and _Capybara_ are all regular user types; however these user types must have a [LangUserType special mark-up].
 
 The new type _Animals.case_ is a supertype of _Cat_, _Dog_ and _Capybara_:
 {{{
