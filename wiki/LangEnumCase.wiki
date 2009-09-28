@@ -44,18 +44,3 @@ You may notice here, that user types may be used in any number of enum-cases.
 One enum-case (as a set of cases) may [LangEnumCaseExtends extend] several other enum-cases, generating related types.
 
 Enum-case may be a [LangGenericEnumCase generic type].
-
-===Generics===
-Enum-case may be a generic type:
-{{{
-enum-case ThisOrThese<T> {
-  case one(T element),
-  case many(List<? extends T> elements)
-}
-}}}
-However, type parameter may _not_ be an element of enum-case:
-{{{
-enum-case ThisOrThat<T, S> {
-  T, S // this does not work
-}
-}}}
