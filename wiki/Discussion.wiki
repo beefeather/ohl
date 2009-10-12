@@ -15,4 +15,5 @@ Yes. Well, if you mean encapsulating everything inside a single type, then yes. 
 Unfortunately not. Because you almost never actually want to use GoF Visitor. Whenever you choose to give it a try you will 90% have to mess with anonymous classes and create their instances on each operation call. That's too much for a simple switch. That's why nobody uses GoF Visitor.
 
 * What are the open questions?
+
 There are some obvious questions: interface with annotations (annotations could use enum-cases), interface with enums.
