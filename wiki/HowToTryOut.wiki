@@ -11,4 +11,4 @@ Eclipse.exe -dev patch_file_name.jar
   # Try to play with it.
   # Try basic features: [LangEnumCase enum-case declaration], [LangSwitch switch operator], [LangUserType user types] and [LangTuple tuples].
   # Try advanced features: [LangEnumCaseExtends enum-case extension], [LangGenericEnumCase generic enum-cases], [LangTypeParam enum-case as a generic type], [LangVariance variance], [LangReflection reflection].
-  # Feel free to write me if you have thoughts or there are problems. See also [[Discussion comments]].
+  # Feel free to write me if you have thoughts or there are problems. See also [Discussion comments].
