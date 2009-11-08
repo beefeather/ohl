@@ -7021,6 +7021,8 @@ private void consumeOhlSwitchLabelQualifier(boolean hasTag) {
   FieldDeclaration fd = new FieldDeclaration();
   fd.type = type;
   fd.name = tag;
+  fd.sourceStart = type.sourceStart;
+  fd.sourceEnd = type.sourceEnd;
   pushOnAstStack(fd);
 }
 
@@ -7147,6 +7149,9 @@ private void consumeOhlSwitchTypeLabel() {
   int sourceEnd = this.endStatementPosition;
 
   FieldDeclaration fd = (FieldDeclaration)this.astStack[this.astPtr--];
+  
+  sourceStart = fd.sourceStart;
+  sourceEnd = fd.sourceEnd;
 
   if (this.astLengthStack[this.astLengthPtr--] != 1) {
     throw new RuntimeException("Expected 1 at ast length stack");
