@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.compiler.ast.ThrowStatement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
+import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 
@@ -149,7 +150,7 @@ public class OhlSupport {
     }
 
 
-    enumFields.add(createOhlClassField(enumDeclaration.name, enumDeclaration.sourceStart));
+    enumFields.add(createOhlClassField(enumDeclaration.name, enumDeclaration.typeParameters, enumDeclaration.sourceStart));
     
     enumDeclaration.memberTypes = (TypeDeclaration[]) enumMemberTypes.toArray(new TypeDeclaration[enumMemberTypes.size()]);
     enumDeclaration.fields = (FieldDeclaration[]) enumFields.toArray(new FieldDeclaration[enumFields.size()]);
@@ -328,13 +329,14 @@ public class OhlSupport {
     }
   }
 
-  static FieldDeclaration createOhlClassField(char[] classShortName, int enumPos) {
+  static FieldDeclaration createOhlClassField(char[] classShortName, TypeParameter[] typeParameters, int enumPos) {
+    int typeParameterNumber = typeParameters == null ? 0 : typeParameters.length;
     FieldDeclaration field = new FieldDeclaration(OHL_CLASS_FIELD_NAME, enumPos, enumPos + 2);
     field.modifiers |= ClassFileConstants.AccPublic | ClassFileConstants.AccFinal | ClassFileConstants.AccStatic;
-    field.type = createOhlClassTypeReference(classShortName);
+    field.type = createOhlClassTypeReference(classShortName, typeParameterNumber);
     
     AllocationExpression initializer = new AllocationExpression();
-    initializer.type = createOhlClassTypeReference(classShortName);
+    initializer.type = createOhlClassTypeReference(classShortName, typeParameterNumber);
     ClassLiteralAccess literal = new ClassLiteralAccess(0, new SingleTypeReference(classShortName, 0));
     initializer.arguments = new Expression[] { literal };
     initializer.sourceStart = enumPos + 1;
@@ -348,11 +350,20 @@ public class OhlSupport {
     return field;
   }
   
-  static TypeReference createOhlClassTypeReference(char[] classShortName) {
+  static TypeReference createOhlClassTypeReference(char[] classShortName, int typeParameterNumber) {
     TypeReference [][] typeArguments = new TypeReference [OHL_CLASS_TOKENS.length][];
 //    TypeReference visitorReference = new QualifiedTypeReference(new char[][] { classShortName, VISITOR_INTERFACE_NAME.toCharArray() },
 //        new long[2]);
-    TypeReference visitorReference = new SingleTypeReference(classShortName, 0);
+    TypeReference visitorReference;
+    if (typeParameterNumber == 0) {
+      visitorReference = new SingleTypeReference(classShortName, 0);
+    } else {
+      TypeReference [] params = new TypeReference[typeParameterNumber];
+      for (int i = 0; i < typeParameterNumber; i++) {
+        params[i] = new Wildcard(Wildcard.UNBOUND);
+      }
+      visitorReference = new ParameterizedSingleTypeReference(classShortName, params, 0, 0);
+    }
     typeArguments[OHL_CLASS_TOKENS.length-1] = new TypeReference[] { visitorReference };
     return new ParameterizedQualifiedTypeReference(OHL_CLASS_TOKENS, typeArguments, 0, new long[OHL_CLASS_TOKENS.length]);
   }
@@ -797,7 +808,7 @@ public class OhlSupport {
             visitorDecl.methods = new AbstractMethodDeclaration[] { md };
             
             FieldDeclaration[] fields = typeDecl.fields;
-            FieldDeclaration ohlClassField = createOhlClassField(typeDecl.name, typeDecl.sourceStart);
+            FieldDeclaration ohlClassField = createOhlClassField(typeDecl.name, typeDecl.typeParameters, typeDecl.sourceStart);
             if (fields == null) {
               fields = new FieldDeclaration[] { ohlClassField };
             } else {
