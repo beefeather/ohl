@@ -10,10 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
+import org.eclipse.core.internal.jobs.JobStatus;
+import org.eclipse.core.internal.localstore.IUnifiedTreeVisitor;
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.codegen.*;
 import org.eclipse.jdt.internal.compiler.flow.*;
 import org.eclipse.jdt.internal.compiler.lookup.*;
+import org.eclipse.jdt.internal.compiler.parser.OhlSupport;
 
 public class Block extends Statement {
 
@@ -22,6 +26,9 @@ public class Block extends Statement {
 	// the number of explicit declaration , used to create scope
 	public BlockScope scope;
 
+	// OHL
+	public boolean ohlIsSynSwitchBlock;
+	
 public Block(int explicitDeclarations) {
 	this.explicitDeclarations = explicitDeclarations;
 }
@@ -86,11 +93,221 @@ public void resolve(BlockScope upperScope) {
 			this.explicitDeclarations == 0
 				? upperScope
 				: new BlockScope(upperScope, this.explicitDeclarations);
+
+
+			if (this.ohlIsSynSwitchBlock) {
+				LocalDeclaration declSt = (LocalDeclaration) this.statements[0];
+				TypeBinding exprType = declSt.resolveRValue(scope);
+
+				SwitchStatement switchStatement = (SwitchStatement) this.statements[1];
+      	        int switchStatementExpressionPos = switchStatement.sourceStart;
+				
+				char[] finalVarName = null;
+				if (declSt.initialization instanceof SingleNameReference) {
+				  SingleNameReference varRef = (SingleNameReference) declSt.initialization;
+				  if (varRef.binding instanceof VariableBinding) {
+				    VariableBinding binding = (VariableBinding) varRef.binding;
+				    if (binding.isFinal()) {
+	  			    finalVarName = varRef.token;
+				    }
+  			  }
+				}
+				
+				if (exprType != null) {
+	               declSt.type = binding2typeRef(exprType, switchStatementExpressionPos); 
+				}
+
+ 		    // ru.spb.rybin.ohl.lang.EnumCaseBase<? super Visitor>
+      	char [][] enum_case_base_tokens = OhlSupport.ENUM_CASE_BASE_TOKENS;
+      	
+      	        
+		    	
+				TypeBinding visitorType = null;
+				if (exprType instanceof TypeVariableBinding) {
+					TypeVariableBinding typeAsVariable = (TypeVariableBinding) exprType;
+					if (typeAsVariable.boundsCount() == 1) {
+						exprType = typeAsVariable.firstBound;
+					}
+				}
+				if (exprType instanceof ParameterizedTypeBinding) {
+					ParameterizedTypeBinding parameterizedTypeBinding = (ParameterizedTypeBinding) exprType;
+					if (CharOperation.equals(enum_case_base_tokens, parameterizedTypeBinding.compoundName)) {
+						if (parameterizedTypeBinding.arguments != null && parameterizedTypeBinding.arguments.length==1) {
+							if (parameterizedTypeBinding.arguments[0] instanceof CaptureBinding) {
+							     CaptureBinding binding = (CaptureBinding) parameterizedTypeBinding.arguments[0];
+							     if (binding.wildcard != null) {
+							    	 if (binding.wildcard.boundKind == Wildcard.SUPER) {
+							    		 visitorType = binding.wildcard.bound;
+							    	 }
+							     }
+							} else if (parameterizedTypeBinding.arguments[0] instanceof WildcardBinding) {
+								WildcardBinding binding = (WildcardBinding) parameterizedTypeBinding.arguments[0];
+						    	 if (binding.boundKind == Wildcard.SUPER) {
+						    		 visitorType = binding.bound;
+						    	 }
+							}
+						}
+					}
+				}
+				SwitchStatement switchSt = (SwitchStatement) this.statements[1];
+				
+				
+				if (visitorType == null) {
+				  switchSt.ohlTodoAnonymousAlloc.type = new SingleTypeReference("unknown_type".toCharArray(), 0);
+				} else {
+    				switchSt.ohlTodoAnonymousAlloc.type = binding2typeRef(visitorType, switchStatementExpressionPos);
+				}
+
+				for (int i=0; i<switchSt.ohlCaseBlocks.length; i++) {
+					Block block = switchSt.ohlCaseBlocks[i];
+          
+					LocalDeclaration decl1 = (LocalDeclaration) block.statements[0];
+          if (finalVarName != null && decl1.name == OhlSupport.NO_TAG_IDENTIFIER) {
+            decl1.name = finalVarName;
+            decl1.ohlRedefineForCast = true;
+          }
+          if (decl1.name == OhlSupport.NO_TAG_IDENTIFIER) {
+            decl1.name = "caseEnumTempVarNotUsed".toCharArray();
+          }
+          
+					switch (switchSt.ohlCaseStatements[i].ohlCaseType) {
+          case CaseStatement.OHL_TYPE_CASE: {
+            
+          } break;
+          case CaseStatement.OHL_STRUCT_CASE: {
+            final char[] selector = ((SingleTypeReference)decl1.type).token;
+            final TypeReference typeRef = binding2typeRef(visitorType, 0);
+            //visitorType.
+            
+            // We prefer not to reuse AST elements and create anew each time.
+            class TypeReferenceFactory {
+              TypeReference create() {
+                QualifiedTypeReference memberType = (QualifiedTypeReference) OhlSupport.convertToMemberType(typeRef, selector, true);
+                if (memberType == null) {
+                  return new SingleTypeReference("<unspecified>".toCharArray(), 0);
+                } else {
+                  char [] [] tokens = memberType.tokens;
+                  //tokens[tokens.length-2] = OhlSupport.CASE_HOLDER_INTERFACE_NAME.toCharArray();
+                  return memberType;
+                }
+              }
+              TypeReference createObjectTypeReference() {
+                char [][] tokens = new char[][] {
+                    "java".toCharArray(),
+                    "lang".toCharArray(),
+                    "Object".toCharArray()
+                };
+                return new QualifiedTypeReference(tokens, new long[tokens.length]);
+              }
+            }
+            TypeReferenceFactory typeRefCopies = new TypeReferenceFactory();
+
+            ReferenceBinding subclass;
+            if (visitorType instanceof ReferenceBinding) {
+              ReferenceBinding visitorRefereceBinding = (ReferenceBinding)visitorType;
+              subclass = scope.getMemberType(selector, visitorRefereceBinding);
+            } else {
+              subclass = null;
+            }
+            
+            if (subclass == null || !subclass.isValidBinding()) {
+              decl1.type = typeRefCopies.createObjectTypeReference();
+              ((CastExpression)decl1.initialization).type = typeRefCopies.createObjectTypeReference();
+            } else {
+              decl1.type = typeRefCopies.create();
+              ((CastExpression)decl1.initialization).type = typeRefCopies.create();
+              FieldBinding[] fields = subclass.fields();
+              for (int j=0; j<fields.length; j++) {
+                // reverse order of statements/fields
+                int statementPos = fields.length - j;
+                if (statementPos >= 0 && statementPos < block.statements.length && block.statements[statementPos] instanceof LocalDeclaration) { 
+                  LocalDeclaration fieldDecl = (LocalDeclaration) block.statements[statementPos];
+                  FieldReference initialization = (FieldReference)fieldDecl.initialization;
+                  initialization.token = fields[j].name;
+                  if (finalVarName != null) {
+                    // what is this?
+                    //((SingleNameReference)initialization.receiver).token = finalVarName;
+                  }
+                }
+              }
+            }
+          } break;
+					}
+				}
+			}
+
+
+
 		for (int i = 0, length = this.statements.length; i < length; i++) {
 			this.statements[i].resolve(this.scope);
 		}
 	}
 }
+
+
+	private static TypeReference binding2typeRef(TypeBinding typeBinding, int sourceBegin) {
+	  if (typeBinding == null) {
+	    return null;
+	  }
+	  if (typeBinding instanceof CaptureBinding) {
+			CaptureBinding captureBinding = (CaptureBinding) typeBinding;
+			if (captureBinding.wildcard != null) {
+				Wildcard res = new Wildcard(captureBinding.wildcard.boundKind);
+				res.bound = binding2typeRef(captureBinding.wildcard.bound, sourceBegin);
+				return res;
+			}
+			throw new RuntimeException();
+		}
+    if (typeBinding instanceof TypeVariableBinding) {
+      TypeVariableBinding var = (TypeVariableBinding)typeBinding;
+      return new SingleTypeReference(var.sourceName, 0);
+    }
+		
+		char[] fullName = typeBinding.qualifiedSourceName();
+		char [] packageName = typeBinding.qualifiedPackageName();
+		String [] classNameInParts = new String(fullName).split("\\.");
+		String [] packageNameInParts;
+		if (packageName.length == 0) {
+			packageNameInParts = new String[0];
+		} else {
+			packageNameInParts = new String(packageName).split("\\.");
+		}
+		char [] [] tokens = new char[packageNameInParts.length + classNameInParts.length] [];
+		long [] pos = new long[packageNameInParts.length + classNameInParts.length];
+		{
+			for (int i = 0; i < pos.length; i++) {
+				long posLong = (sourceBegin + i) << 32 | sourceBegin + i + 1;
+				pos[i] = posLong;
+			}
+		}
+		for (int i=0; i<packageNameInParts.length; i++) {
+			tokens[i] = packageNameInParts[i].toCharArray();
+		}
+		for (int i=0; i<classNameInParts.length; i++) {
+			tokens[i + packageNameInParts.length] = classNameInParts[i].toCharArray();
+		}
+		
+		if (typeBinding instanceof ParameterizedTypeBinding) {
+			ParameterizedTypeBinding genericType = (ParameterizedTypeBinding)typeBinding;
+			TypeReference [] [] genericParams = new TypeReference[tokens.length][];
+			if (genericType.arguments != null) {
+	  			TypeReference [] lastComponentParams = new TypeReference[genericType.arguments.length];
+	  			genericParams[genericParams.length-1] = lastComponentParams;
+	  			
+	  			for (int i=0; i<lastComponentParams.length; i++) {
+	  				lastComponentParams[i] = binding2typeRef(genericType.arguments[i], sourceBegin);
+	  			}
+			}
+			ParameterizedQualifiedTypeReference res = 
+				new ParameterizedQualifiedTypeReference(tokens, genericParams, 0, pos);
+			return res;
+		} else {
+			QualifiedTypeReference res = new QualifiedTypeReference(tokens, pos);
+			return res;
+		}
+		
+	}
+
 
 public void resolveUsing(BlockScope givenScope) {
 	if ((this.bits & UndocumentedEmptyBlock) != 0) {

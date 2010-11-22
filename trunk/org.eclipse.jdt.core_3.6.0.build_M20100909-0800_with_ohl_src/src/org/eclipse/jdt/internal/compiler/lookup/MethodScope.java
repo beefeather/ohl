@@ -212,7 +212,7 @@ private void checkAndSetModifiersForMethod(MethodBinding methodBinding) {
 		problemReporter().nativeMethodsCannotBeStrictfp(declaringClass, (AbstractMethodDeclaration) this.referenceContext);
 
 	// static members are only authorized in a static member or top level type
-	if (((realModifiers & ClassFileConstants.AccStatic) != 0) && declaringClass.isNestedType() && !declaringClass.isStatic())
+ 	if (((realModifiers & ClassFileConstants.AccStatic) != 0) && declaringClass.isNestedType() && !declaringClass.isStatic() && !declaringClass.ohlIsEnumCase)	
 		problemReporter().unexpectedStaticModifierForMethod(declaringClass, (AbstractMethodDeclaration) this.referenceContext);
 
 	methodBinding.modifiers = modifiers;

@@ -27,7 +27,8 @@ public class TypeDeclaration extends Statement implements ProblemSeverities, Ref
 	public static final int INTERFACE_DECL = 2;
 	public static final int ENUM_DECL = 3;
 	public static final int ANNOTATION_TYPE_DECL = 4;
-
+ 	public static final int OHL_ENUM_CASE_DECL = 5;	
+ 	
 	public int modifiers = ClassFileConstants.AccDefault;
 	public int modifiersSourceStart;
 	public Annotation[] annotations;
@@ -58,6 +59,8 @@ public class TypeDeclaration extends Statement implements ProblemSeverities, Ref
 
 	// 1.5 support
 	public TypeParameter[] typeParameters;
+ 	// OHL support           
+    public boolean ohlIsEnumCase;
 
 public TypeDeclaration(CompilationResult compilationResult){
 	this.compilationResult = compilationResult;

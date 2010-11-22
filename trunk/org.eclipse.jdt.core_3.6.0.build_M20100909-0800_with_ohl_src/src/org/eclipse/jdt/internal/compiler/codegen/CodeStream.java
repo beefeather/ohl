@@ -93,6 +93,22 @@ public CodeStream(ClassFile givenClassFile) {
 		this.lineSeparatorPositions = givenClassFile.referenceBinding.scope.referenceCompilationUnit().compilationResult.getLineSeparatorPositions();
 	}
 }
+public void generateSyntheticBodyForOhlReturn0(SyntheticMethodBinding methodBinding) {
+  //ClassScope scope = ((SourceTypeBinding)methodBinding.declaringClass).scope;
+  initializeMaxLocals(methodBinding);
+
+  this.iconst_0();
+  this.ireturn();
+}
+public void generateSyntheticBodyForOhlReturnThis(SyntheticMethodBinding methodBinding,
+    MethodBinding visitMethodBinding) {
+  initializeMaxLocals(methodBinding);
+
+  this.aload_1();
+  this.aload_0();
+  this.invoke(Opcodes.OPC_invokeinterface, visitMethodBinding, null /* default declaringClass */);
+  ireturn();
+}
 /**
  * This methods searches for an existing entry inside the pcToSourceMap table with a pc equals to @pc.
  * If there is an existing entry it returns -1 (no insertion required).
