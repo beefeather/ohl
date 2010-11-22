@@ -493,7 +493,7 @@ public class ClassFile implements TypeConstants, TypeIds {
 				// access flag
 				if (innerClass.isAnonymousType()) {
 					accessFlags &= ~ClassFileConstants.AccFinal;
-				} else if (innerClass.isMemberType() && innerClass.isInterface()) {
+				} else if (innerClass.isMemberType() && (innerClass.isInterface() || innerClass.ohlIsEnumCase)) {
 					accessFlags |= ClassFileConstants.AccStatic; // implicitely static
 				}
 				this.contents[this.contentsOffset++] = (byte) (accessFlags >> 8);
@@ -1084,12 +1084,20 @@ public class ClassFile implements TypeConstants, TypeIds {
 					case SyntheticMethodBinding.SwitchTable :
 						// generate a method info to define the switch table synthetic method
 						addSyntheticSwitchTable(syntheticMethod);
+						break;
+          case SyntheticMethodBinding.OhlReturn0 :
+            // generate a method info to define the switch table synthetic method
+            addSyntheticOhlReturn0Method(syntheticMethod);
+            break;
+          case SyntheticMethodBinding.OhlReturnThis :
+            // generate a method info to define the switch table synthetic method
+            addSyntheticOhlReturnThisMethod(syntheticMethod);
+            break;
 				}
 			}
 		}
 	}
-
-	/**
+  /**
 	 * INTERNAL USE-ONLY
 	 * Generate the bytes for a synthetic method that provides an access to a private constructor.
 	 *
@@ -1296,6 +1304,59 @@ public class ClassFile implements TypeConstants, TypeIds {
 		this.contents[methodAttributeOffset] = (byte) attributeNumber;
 	}
 
+
+  private void addSyntheticOhlReturn0Method(
+      SyntheticMethodBinding methodBinding) {
+    generateMethodInfoHeader(methodBinding);
+    int methodAttributeOffset = this.contentsOffset;
+    // this will add exception attribute, synthetic attribute, deprecated attribute,...
+    int attributeNumber = generateMethodInfoAttribute(methodBinding);
+    // Code attribute
+    int codeAttributeOffset = contentsOffset;
+    attributeNumber++; // add code attribute
+    generateCodeAttributeHeader();
+    codeStream.init(this);
+    codeStream.generateSyntheticBodyForOhlReturn0(methodBinding);
+    completeCodeAttributeForSyntheticMethod(
+      true,
+      methodBinding,
+      codeAttributeOffset,
+      ((SourceTypeBinding) methodBinding.declaringClass)
+        .scope
+        .referenceCompilationUnit()
+        .compilationResult
+        .getLineSeparatorPositions());
+    // update the number of attributes
+    contents[methodAttributeOffset++] = (byte) (attributeNumber >> 8);
+    contents[methodAttributeOffset] = (byte) attributeNumber;
+  }
+
+  private void addSyntheticOhlReturnThisMethod(
+      SyntheticMethodBinding methodBinding) {
+    generateMethodInfoHeader(methodBinding);
+    int methodAttributeOffset = this.contentsOffset;
+    // this will add exception attribute, synthetic attribute, deprecated attribute,...
+    int attributeNumber = generateMethodInfoAttribute(methodBinding);
+    // Code attribute
+    int codeAttributeOffset = contentsOffset;
+    attributeNumber++; // add code attribute
+    generateCodeAttributeHeader();
+    codeStream.init(this);
+    codeStream.generateSyntheticBodyForOhlReturnThis(methodBinding, methodBinding.targetMethod);
+    completeCodeAttributeForSyntheticMethod(
+      true,
+      methodBinding,
+      codeAttributeOffset,
+      ((SourceTypeBinding) methodBinding.declaringClass)
+        .scope
+        .referenceCompilationUnit()
+        .compilationResult
+        .getLineSeparatorPositions());
+    // update the number of attributes
+    contents[methodAttributeOffset++] = (byte) (attributeNumber >> 8);
+    contents[methodAttributeOffset] = (byte) attributeNumber;
+  }
+  
 	/**
 	 * INTERNAL USE-ONLY
 	 * That method completes the creation of the code attribute by setting

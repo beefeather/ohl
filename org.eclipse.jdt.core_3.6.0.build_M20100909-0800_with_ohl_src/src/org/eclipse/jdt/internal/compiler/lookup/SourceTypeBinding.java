@@ -63,6 +63,8 @@ public SourceTypeBinding(char[][] compoundName, PackageBinding fPackage, ClassSc
 	this.fields = Binding.UNINITIALIZED_FIELDS;
 	this.methods = Binding.UNINITIALIZED_METHODS;
 
+	ohlIsEnumCase = scope.referenceContext.ohlIsEnumCase;
+	
 	computeId();
 }
 
@@ -469,6 +471,63 @@ public SyntheticMethodBinding addSyntheticMethodForSwitchEnum(TypeBinding enumBi
 	}
 	return accessMethod;
 }
+/*
+ * Adds "return 0;" method for implicit ohl switch case 
+ */
+public SyntheticMethodBinding addSyntheticOhlMethod(MethodBinding inheritedMethodToBridge) {
+  // targetMethod may be inherited
+  if (this.synthetics == null)
+    this.synthetics = new HashMap[MAX_SYNTHETICS];
+  if (this.synthetics[SourceTypeBinding.METHOD_EMUL] == null) {
+    this.synthetics[SourceTypeBinding.METHOD_EMUL] = new HashMap(5);
+  } else {
+    // check to see if there is another equivalent inheritedMethod already added
+  }
+
+  SyntheticMethodBinding accessMethod = null;
+  SyntheticMethodBinding[] accessors = (SyntheticMethodBinding[]) this.synthetics[SourceTypeBinding.METHOD_EMUL].get(inheritedMethodToBridge);
+  if (accessors == null) {
+    accessMethod = new SyntheticMethodBinding(inheritedMethodToBridge, 0, this);
+    this.synthetics[SourceTypeBinding.METHOD_EMUL].put(inheritedMethodToBridge, accessors = new SyntheticMethodBinding[2]);
+    accessors[1] = accessMethod;    
+  } else {
+    if ((accessMethod = accessors[1]) == null) {
+      accessMethod = new SyntheticMethodBinding(inheritedMethodToBridge, 0, this);
+      accessors[1] = accessMethod;
+    }
+  }
+  return accessMethod;
+}
+
+/*
+ * Adds "return visitor.visit_type_(this);" method for implicit ohl custom enum case base 
+ */
+public SyntheticMethodBinding addSyntheticOhlVisitThisMethod(MethodBinding inheritedMethodToBridge, MethodBinding visitMethod) {
+  // targetMethod may be inherited
+  if (this.synthetics == null)
+    this.synthetics = new HashMap[MAX_SYNTHETICS];
+  if (this.synthetics[SourceTypeBinding.METHOD_EMUL] == null) {
+    this.synthetics[SourceTypeBinding.METHOD_EMUL] = new HashMap(5);
+  } else {
+    // check to see if there is another equivalent inheritedMethod already added
+  }
+
+  SyntheticMethodBinding accessMethod = null;
+  SyntheticMethodBinding[] accessors = (SyntheticMethodBinding[]) this.synthetics[SourceTypeBinding.METHOD_EMUL].get(inheritedMethodToBridge);
+  if (accessors == null) {
+    accessMethod = new SyntheticMethodBinding(inheritedMethodToBridge, 0, this, visitMethod);
+    this.synthetics[SourceTypeBinding.METHOD_EMUL].put(inheritedMethodToBridge, accessors = new SyntheticMethodBinding[2]);
+    accessors[1] = accessMethod;    
+  } else {
+    if ((accessMethod = accessors[1]) == null) {
+      accessMethod = new SyntheticMethodBinding(inheritedMethodToBridge, 0, this, visitMethod);
+      accessors[1] = accessMethod;
+    }
+  }
+  return accessMethod;
+}
+
+
 /* Add a new synthetic access method for access to <targetMethod>.
  * Must distinguish access method used for super access from others (need to use invokespecial bytecode)
 	Answer the new method or the existing method if one already existed.

@@ -198,7 +198,7 @@ void computeLocalVariablePositions(int ilocal, int initOffset, CodeStream codeSt
 				&& (local.declaration != null) // unused (and non secret) local
 				&& ((local.declaration.bits & ASTNode.IsLocalDeclarationReachable) != 0)) { // declaration is reachable
 
-				if (!(local.declaration instanceof Argument)) // do not report unused catch arguments
+				if (!(local.declaration instanceof Argument) && !local.declaration.ohlCaseParameter) // do not report unused catch arguments
 					problemReporter().unusedLocalVariable(local.declaration);
 			}
 

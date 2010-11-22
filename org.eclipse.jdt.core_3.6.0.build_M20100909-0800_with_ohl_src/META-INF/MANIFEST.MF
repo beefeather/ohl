@@ -57,7 +57,7 @@ Export-Package: org.eclipse.jdt.core,org.eclipse.jdt.core.compiler,org
  ;x-internal:=true,org.eclipse.jdt.internal.formatter.align;x-internal
  :=true,org.eclipse.jdt.internal.formatter.comment;x-internal:=true,or
  g.eclipse.jdt.internal.formatter.old;x-internal:=true
-Bundle-Version: 3.6.1.v_A68_R36x
+Bundle-Version: 3.6.1.v_A68_R36x_OHL_v2
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %providerName
 Bundle-Name: %pluginName

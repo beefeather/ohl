@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.compiler.lookup.*;
  */
 public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeReference {
 
+  public char [] ohlImplementsTag = null;
 	public TypeReference[][] typeArguments;
 
 	/**

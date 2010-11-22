@@ -20,6 +20,7 @@ import org.eclipse.jdt.internal.compiler.impl.*;
 import org.eclipse.jdt.core.compiler.*;
 import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.lookup.*;
+import org.eclipse.jdt.internal.compiler.parser.Parser;
 import org.eclipse.jdt.internal.compiler.problem.*;
 import org.eclipse.jdt.internal.compiler.util.HashtableOfObjectToInt;
 import org.eclipse.jdt.internal.core.util.CommentRecorderParser;
@@ -791,7 +792,7 @@ public TypeReference getTypeReference(int dim) {
 				if (this.reportReferenceInfo) {
 					this.requestor.acceptTypeReference(ref.tokens, ref.sourceStart, ref.sourceEnd);
 				}
-				return ref;
+				return Parser.ohlConvertCaseReference(ref);
 			} else {
 				ArrayQualifiedTypeReference ref =
 					new ArrayQualifiedTypeReference(tokens, dim, positions);
