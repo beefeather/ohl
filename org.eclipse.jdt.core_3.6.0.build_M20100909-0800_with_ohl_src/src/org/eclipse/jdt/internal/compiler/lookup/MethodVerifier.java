@@ -145,6 +145,9 @@ void checkAbstractMethod(MethodBinding abstractMethod) {
           public int sourceStart() {
             return 0;
           }
+          public TypeBinding expectedType() {
+       		return null;
+          }
         };
 		    String methodSelector = OhlSupport.VISITOR_TYPE_METHOD_PREFIX;
 		      
