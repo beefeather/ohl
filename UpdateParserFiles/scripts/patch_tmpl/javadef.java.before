@@ -1,0 +1,22 @@
+interface javadef
+{
+    public final static int
+      ERROR_SYMBOL      = 110,
+      MAX_NAME_LENGTH   = 41,
+      NUM_STATES        = 1002,
+
+      NT_OFFSET         = 110,
+      SCOPE_UBOUND      = 140,
+      SCOPE_SIZE        = 141,
+      LA_STATE_OFFSET   = 12556,
+      MAX_LA            = 1,
+      NUM_RULES         = 732,
+      NUM_TERMINALS     = 110,
+      NUM_NON_TERMINALS = 327,
+      NUM_SYMBOLS       = 437,
+      START_STATE       = 1504,
+      EOFT_SYMBOL       = 69,
+      EOLT_SYMBOL       = 69,
+      ACCEPT_ACTION     = 12555,
+      ERROR_ACTION      = 12556;
+};
