@@ -1,4 +1,4 @@
-set -x
+#set -x
 
 UpdateParserFiles=../
 WORKSPACE_DIR=$( readlink -f ../.. )
