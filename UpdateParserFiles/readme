@@ -1,0 +1,6 @@
+A project that helps regenerating Java parser after the grammar has been changed.
+
+It depends on org.eclipse.jdt.proxy.project in the same workspace, that should contain built jikesps utility.
+
+To regenerate parser call step1.sh from scripts (under Unix or cyg-win), then run UpdateParserFiles launch,
+then call step2.sh.
