@@ -1,0 +1,2 @@
+Patched version of org.eclipse.jdt.code plugin that supports OHL syntax.
+Based on sources from Eclipse SDK 3.6 build M20100909-0800.
