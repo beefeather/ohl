@@ -2,6 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.eclipse.jdt.core_3.6.0_ohl"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.eclipse.jdt.proxy.project"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
