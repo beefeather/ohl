@@ -1,6 +1,6 @@
 echo Generating parser files
 
-set -x
+#set -x
 
 WORKSPACE_DIR=$( readlink -f ../.. )
 
@@ -37,8 +37,8 @@ sed -e "s/};/}/" $PATCH_OUTPUT/ParserBasicInformation.java.tmp > $PATCH_OUTPUT/P
 
 rm $PATCH_OUTPUT/ParserBasicInformation.java.tmp
 
-cp patch_tmpl/TerminalTokens.java.orig $PATCH_OUTPUT/TerminalTokens.java
-merge $PATCH_OUTPUT/TerminalTokens.java patch_tmpl/javasym.java.orig $JIKES_OUTPUT/javasym.java
+cp patch_tmpl/TerminalTokens.java.before $PATCH_OUTPUT/TerminalTokens.java
+merge $PATCH_OUTPUT/TerminalTokens.java patch_tmpl/javasym.java.before $JIKES_OUTPUT/javasym.java
 
 
 cp $JIKES_OUTPUT/javadcl.java $JIKES_OUTPUT/javahdr.java $UpdateParserFiles
