@@ -28,10 +28,10 @@ PATCH_OUTPUT=../var/patch-output
 
 mkdir -p $PATCH_OUTPUT
 
-cp patch_tmpl/ParserBasicInformation.java.orig \
+cp patch_tmpl/ParserBasicInformation.java.before \
   $PATCH_OUTPUT/ParserBasicInformation.java.tmp
 
-merge $PATCH_OUTPUT/ParserBasicInformation.java.tmp patch_tmpl/javadef.java.orig $JIKES_OUTPUT/javadef.java
+merge $PATCH_OUTPUT/ParserBasicInformation.java.tmp patch_tmpl/javadef.java.before $JIKES_OUTPUT/javadef.java
 
 sed -e "s/};/}/" $PATCH_OUTPUT/ParserBasicInformation.java.tmp > $PATCH_OUTPUT/ParserBasicInformation.java
 

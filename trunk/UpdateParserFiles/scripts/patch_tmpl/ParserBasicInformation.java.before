@@ -33,5 +33,5 @@ public interface ParserBasicInformation {
       EOLT_SYMBOL       = 69,
       ACCEPT_ACTION     = 12555,
       ERROR_ACTION      = 12556;
-}
+};
 
