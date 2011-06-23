@@ -1,6 +1,13 @@
 package ru.spb.rybin.ohl.v3.samples.expressionparser;
 
-import ru.spb.rybin.ohl.v3.samples.expressionparser.Lexer.TokensEx;
+import ru.spb.rybin.ohl.v3.samples.expressionparser.ast.AstBinaryOperation;
+import ru.spb.rybin.ohl.v3.samples.expressionparser.ast.AstConstant;
+import ru.spb.rybin.ohl.v3.samples.expressionparser.ast.AstNode;
+import ru.spb.rybin.ohl.v3.samples.expressionparser.ast.AstType;
+import ru.spb.rybin.ohl.v3.samples.expressionparser.ast.AstVariable;
+import ru.spb.rybin.ohl.v3.samples.expressionparser.lexer.Lexer;
+import ru.spb.rybin.ohl.v3.samples.expressionparser.lexer.Tokens;
+import ru.spb.rybin.ohl.v3.samples.expressionparser.lexer.TokensEx;
 
 public class Parser {
   public Parser(Lexer lexer) {
@@ -54,7 +61,7 @@ public class Parser {
       case * paren_open() {
         lexer.consume();
         AstNode inner = parseExpression();
-        if (lexer.peek() != Lexer.Tokens.paren_close) {
+        if (lexer.peek() != Tokens.paren_close) {
           throw new ParserException("')' expected");
         }
         lexer.consume();
