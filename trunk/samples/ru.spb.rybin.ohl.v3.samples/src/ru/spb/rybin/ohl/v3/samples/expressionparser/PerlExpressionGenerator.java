@@ -1,5 +1,10 @@
 package ru.spb.rybin.ohl.v3.samples.expressionparser;
 
+import ru.spb.rybin.ohl.v3.samples.expressionparser.ast.AstBinaryOperation;
+import ru.spb.rybin.ohl.v3.samples.expressionparser.ast.AstConstant;
+import ru.spb.rybin.ohl.v3.samples.expressionparser.ast.AstNode;
+import ru.spb.rybin.ohl.v3.samples.expressionparser.ast.AstVariable;
+
 public class PerlExpressionGenerator {
   public static void generate(AstNode node, StringBuilder output) {
     output.append('(');
