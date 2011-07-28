@@ -160,8 +160,15 @@ void checkAbstractMethod(MethodBinding abstractMethod) {
 		  }
 		}
 		if (visitMethod != null) {
+		  // OHL
       SyntheticMethodBinding fineAccept = this.type.addSyntheticOhlVisitThisMethod(abstractMethod, visitMethod);
       this.type.addSyntheticBridgeMethod(abstractMethod.original(), fineAccept);
+		} else if (CharOperation.equals(abstractMethod.selector, OhlSupport.TO_ENUM_CASE_METHOD_NAME)) {
+		  // OHL
+			boolean ok = OhlSupport.checkToEnumCaseSyntheticMethod(abstractMethod, this.type, problemReporter());
+			if (ok) {
+				this.type.addSyntheticOhlReturnThisMethod(abstractMethod);
+			}
 		} else if (typeDeclaration.allocation != null && typeDeclaration.allocation.ohlIsVisitorImpl) {
 		  // OHL
       this.type.addSyntheticOhlMethod(abstractMethod);

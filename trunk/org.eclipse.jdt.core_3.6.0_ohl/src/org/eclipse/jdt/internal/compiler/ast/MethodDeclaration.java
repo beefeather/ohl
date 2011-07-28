@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
+import org.eclipse.jdt.internal.compiler.parser.OhlSupport;
 import org.eclipse.jdt.internal.compiler.parser.Parser;
 import org.eclipse.jdt.internal.compiler.problem.AbortMethod;
 import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
@@ -82,6 +83,13 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 			}
 			// propagate to statements
 			if (this.statements != null) {
+				
+				
+				// OHL
+				if (CharOperation.equals(this.selector, OhlSupport.TO_ENUM_CASE_METHOD_NAME)) {
+					this.scope.problemReporter().ohlError("toEnumCase method name is reserved", this);
+				}
+				
 				int complaintLevel = (flowInfo.reachMode() & FlowInfo.UNREACHABLE) == 0 ? Statement.NOT_COMPLAINED : Statement.COMPLAINED_FAKE_REACHABLE;
 				for (int i = 0, count = this.statements.length; i < count; i++) {
 					Statement stat = this.statements[i];

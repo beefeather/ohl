@@ -1089,6 +1089,10 @@ public class ClassFile implements TypeConstants, TypeIds {
             // generate a method info to define the switch table synthetic method
             addSyntheticOhlReturn0Method(syntheticMethod);
             break;
+          case SyntheticMethodBinding.OhlVisitThis :
+            // generate a method info to define the switch table synthetic method
+            addSyntheticOhlVisitThisMethod(syntheticMethod);
+            break;
           case SyntheticMethodBinding.OhlReturnThis :
             // generate a method info to define the switch table synthetic method
             addSyntheticOhlReturnThisMethod(syntheticMethod);
@@ -1317,6 +1321,32 @@ public class ClassFile implements TypeConstants, TypeIds {
     generateCodeAttributeHeader();
     codeStream.init(this);
     codeStream.generateSyntheticBodyForOhlReturn0(methodBinding);
+    completeCodeAttributeForSyntheticMethod(
+      true,
+      methodBinding,
+      codeAttributeOffset,
+      ((SourceTypeBinding) methodBinding.declaringClass)
+        .scope
+        .referenceCompilationUnit()
+        .compilationResult
+        .getLineSeparatorPositions());
+    // update the number of attributes
+    contents[methodAttributeOffset++] = (byte) (attributeNumber >> 8);
+    contents[methodAttributeOffset] = (byte) attributeNumber;
+  }
+
+  private void addSyntheticOhlVisitThisMethod(
+      SyntheticMethodBinding methodBinding) {
+    generateMethodInfoHeader(methodBinding);
+    int methodAttributeOffset = this.contentsOffset;
+    // this will add exception attribute, synthetic attribute, deprecated attribute,...
+    int attributeNumber = generateMethodInfoAttribute(methodBinding);
+    // Code attribute
+    int codeAttributeOffset = contentsOffset;
+    attributeNumber++; // add code attribute
+    generateCodeAttributeHeader();
+    codeStream.init(this);
+    codeStream.generateSyntheticBodyForOhlVisitThis(methodBinding, methodBinding.targetMethod);
     completeCodeAttributeForSyntheticMethod(
       true,
       methodBinding,
