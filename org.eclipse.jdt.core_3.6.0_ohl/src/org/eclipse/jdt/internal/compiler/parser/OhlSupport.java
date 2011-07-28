@@ -38,7 +38,10 @@ import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
+import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 
 public class OhlSupport {
 
@@ -664,6 +667,7 @@ public class OhlSupport {
   static final int CASE_CODES_START = 2;
   public static final char[] IMPLEMENTS_TAG_FIELD_NAME = "ohl_name_tag".toCharArray();
   private static final char[] OHL_CLASS_FIELD_NAME = "ohl_class".toCharArray();
+	public static final char[] TO_ENUM_CASE_METHOD_NAME = "toEnumCase".toCharArray();
   
   static class Cloner {
 
@@ -824,4 +828,24 @@ public class OhlSupport {
       }
     }
   }
+
+	public static boolean checkToEnumCaseSyntheticMethod(MethodBinding abstractMethod, SourceTypeBinding type, ProblemReporter problemReporter) {
+		if (abstractMethod.parameters.length != 0) {
+			problemReporter.ohlError("Wrong signature of toEnumCase method", type.scope.referenceContext);
+		}
+		if (abstractMethod.typeVariables.length != 0) {
+			problemReporter.ohlError("toEnumCase method mustn't be generic", type.scope.referenceContext);
+		}
+		
+		if (!type.isCompatibleWith(abstractMethod.returnType)) {
+			problemReporter.typeMismatchError(type, abstractMethod.returnType, type.scope.referenceContext, abstractMethod.sourceMethod());
+			return false;
+		}		
+		if (type.needsUncheckedConversion(abstractMethod.returnType)) {
+			problemReporter.ohlError("Unsafe toEnumCase return type convertion", type.scope.referenceContext);
+			return false;
+		}
+		
+		return true;
+	}
 }

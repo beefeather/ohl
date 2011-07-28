@@ -527,6 +527,35 @@ public SyntheticMethodBinding addSyntheticOhlVisitThisMethod(MethodBinding inher
   return accessMethod;
 }
 
+/*
+ * Adds "return visitor.visit_type_(this);" method for implicit ohl custom enum case base 
+ */
+public SyntheticMethodBinding addSyntheticOhlReturnThisMethod(MethodBinding inheritedMethodToBridge) {
+  // targetMethod may be inherited
+  if (this.synthetics == null)
+    this.synthetics = new HashMap[MAX_SYNTHETICS];
+  if (this.synthetics[SourceTypeBinding.METHOD_EMUL] == null) {
+    this.synthetics[SourceTypeBinding.METHOD_EMUL] = new HashMap(5);
+  } else {
+    // check to see if there is another equivalent inheritedMethod already added
+  }
+
+  SyntheticMethodBinding accessMethod = null;
+  SyntheticMethodBinding[] accessors = (SyntheticMethodBinding[]) this.synthetics[SourceTypeBinding.METHOD_EMUL].get(inheritedMethodToBridge);
+  SyntheticMethodBinding.ReturnThisMethodParam returnThisMethodParam = null;
+  if (accessors == null) {
+    accessMethod = new SyntheticMethodBinding(inheritedMethodToBridge, returnThisMethodParam, this);
+    this.synthetics[SourceTypeBinding.METHOD_EMUL].put(inheritedMethodToBridge, accessors = new SyntheticMethodBinding[2]);
+    accessors[1] = accessMethod;    
+  } else {
+    if ((accessMethod = accessors[1]) == null) {
+      accessMethod = new SyntheticMethodBinding(inheritedMethodToBridge, returnThisMethodParam, this);
+      accessors[1] = accessMethod;
+    }
+  }
+  return accessMethod;
+}
+
 
 /* Add a new synthetic access method for access to <targetMethod>.
  * Must distinguish access method used for super access from others (need to use invokespecial bytecode)

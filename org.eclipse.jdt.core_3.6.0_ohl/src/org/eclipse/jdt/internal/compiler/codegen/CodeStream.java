@@ -104,6 +104,14 @@ public void generateSyntheticBodyForOhlReturnThis(SyntheticMethodBinding methodB
     MethodBinding visitMethodBinding) {
   initializeMaxLocals(methodBinding);
 
+
+  this.aload_0();
+  this.areturn();
+}
+public void generateSyntheticBodyForOhlVisitThis(SyntheticMethodBinding methodBinding,
+    MethodBinding visitMethodBinding) {
+  initializeMaxLocals(methodBinding);
+
   this.aload_1();
   this.aload_0();
   this.invoke(Opcodes.OPC_invokeinterface, visitMethodBinding, null /* default declaringClass */);

@@ -103,14 +103,25 @@ public void resolve(BlockScope upperScope) {
       	        int switchStatementExpressionPos = switchStatement.sourceStart;
 				
 				char[] finalVarName = null;
-				if (declSt.initialization instanceof SingleNameReference) {
-				  SingleNameReference varRef = (SingleNameReference) declSt.initialization;
-				  if (varRef.binding instanceof VariableBinding) {
-				    VariableBinding binding = (VariableBinding) varRef.binding;
-				    if (binding.isFinal()) {
-	  			    finalVarName = varRef.token;
-				    }
-  			  }
+				{
+          Expression candidateExpression = declSt.initialization;
+					if (candidateExpression instanceof MessageSend) {
+  					MessageSend messageSend = (MessageSend) candidateExpression;
+  					if (CharOperation.equals(messageSend.selector, OhlSupport.TO_ENUM_CASE_METHOD_NAME)) {
+  						// This should be safe: we control that user cannot name his method "toEnumCase".
+  						// Our true method is synthetic.
+  						candidateExpression = messageSend.receiver;
+  					}
+  				}
+  				if (candidateExpression instanceof SingleNameReference) {
+  				  SingleNameReference varRef = (SingleNameReference) candidateExpression;
+  				  if (varRef.binding instanceof VariableBinding) {
+  				    VariableBinding binding = (VariableBinding) varRef.binding;
+  				    if (binding.isFinal()) {
+  	  			    finalVarName = varRef.token;
+  				    }
+    			  }
+  				}
 				}
 				
 				if (exprType != null) {

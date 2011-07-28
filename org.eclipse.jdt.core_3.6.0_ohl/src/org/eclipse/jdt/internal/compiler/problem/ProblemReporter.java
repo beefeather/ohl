@@ -7523,4 +7523,15 @@ public void wrongSequenceOfExceptionTypesError(TryStatement statement, TypeBindi
 		typeRef.sourceStart,
 		typeRef.sourceEnd);
 }
+
+public void ohlError(String string, ASTNode typeDeclaration) {
+	String[] arguments = new String[] {string};
+	this.handle(
+		IProblem.Unclassified,
+		arguments,
+		arguments,
+		ProblemSeverities.Error | ProblemSeverities.Fatal,
+		typeDeclaration == null ? 0 : typeDeclaration.sourceStart,
+		typeDeclaration == null ? 0 : typeDeclaration.sourceEnd);
+}
 }
