@@ -89,6 +89,7 @@ public void resolve(BlockScope upperScope) {
 		upperScope.problemReporter().undocumentedEmptyBlock(this.sourceStart, this.sourceEnd);
 	}
 	if (this.statements != null) {
+    int alreadyResolvedStatements = 0;
 		this.scope =
 			this.explicitDeclarations == 0
 				? upperScope
@@ -96,23 +97,25 @@ public void resolve(BlockScope upperScope) {
 
 
 			if (this.ohlIsSynSwitchBlock) {
-				LocalDeclaration declSt = (LocalDeclaration) this.statements[0];
+				LocalDeclaration declSt = (LocalDeclaration) this.statements[OhlSupport.SwitchLayout.FIRST_DECLARATION_OFFSET];
+				LocalDeclaration newDeclSt = (LocalDeclaration) this.statements[OhlSupport.SwitchLayout.SECOND_DECLARATION_OFFSET];
+				SwitchStatement switchStatement = (SwitchStatement) this.statements[OhlSupport.SwitchLayout.SWITCH_STATEMENT_OFFSET];
+				int switchStatementExpressionPos = switchStatement.sourceStart;
+				
 				TypeBinding exprType = declSt.resolveRValue(scope);
+				if (exprType != null) {
+					declSt.type = binding2typeRef(exprType, switchStatementExpressionPos); 
+					newDeclSt.type = binding2typeRef(exprType, switchStatementExpressionPos); 
+				}
+				
+				// Resolve to add variable to scope (we use it right now).
+				declSt.resolve(scope);
+				alreadyResolvedStatements++;
 
-				SwitchStatement switchStatement = (SwitchStatement) this.statements[1];
-      	        int switchStatementExpressionPos = switchStatement.sourceStart;
 				
 				char[] finalVarName = null;
 				{
           Expression candidateExpression = declSt.initialization;
-					if (candidateExpression instanceof MessageSend) {
-  					MessageSend messageSend = (MessageSend) candidateExpression;
-  					if (CharOperation.equals(messageSend.selector, OhlSupport.TO_ENUM_CASE_METHOD_NAME)) {
-  						// This should be safe: we control that user cannot name his method "toEnumCase".
-  						// Our true method is synthetic.
-  						candidateExpression = messageSend.receiver;
-  					}
-  				}
   				if (candidateExpression instanceof SingleNameReference) {
   				  SingleNameReference varRef = (SingleNameReference) candidateExpression;
   				  if (varRef.binding instanceof VariableBinding) {
@@ -124,55 +127,39 @@ public void resolve(BlockScope upperScope) {
   				}
 				}
 				
-				if (exprType != null) {
-	               declSt.type = binding2typeRef(exprType, switchStatementExpressionPos); 
-				}
+				
 
- 		    // ru.spb.rybin.ohl.lang.EnumCaseBase<? super Visitor>
-      	char [][] enum_case_base_tokens = OhlSupport.ENUM_CASE_BASE_TOKENS;
+      	TypeBinding visitorType = OhlSupport.getVisitorTypeFromEnumCase(exprType);
+      	if (visitorType == null) {
+      		// Try calling toEnumCase
+      		boolean hasToEnumCase = OhlSupport.hasToEnumCaseMethod(exprType, scope);
+      		if (hasToEnumCase) {
+      			//newDeclSt.type = declSt.type;
+      			MessageSend messageSend = new MessageSend();
+      			messageSend.receiver = new SingleNameReference(declSt.name, 0);
+      			messageSend.selector = OhlSupport.TO_ENUM_CASE_METHOD_NAME;
+      			messageSend.arguments = new Expression[0];
+      			messageSend.typeArguments = null;
+      			messageSend.sourceStart = declSt.sourceStart;
+      			messageSend.sourceEnd = declSt.sourceEnd;
+      			newDeclSt.initialization = messageSend;
+
+      			exprType = newDeclSt.resolveRValue(scope);
+  					newDeclSt.type = binding2typeRef(exprType, switchStatementExpressionPos); 
+      			visitorType = OhlSupport.getVisitorTypeFromEnumCase(exprType);
+      		}
+      	}
       	
-      	        
-		    	
-				TypeBinding visitorType = null;
-				if (exprType instanceof TypeVariableBinding) {
-					TypeVariableBinding typeAsVariable = (TypeVariableBinding) exprType;
-					if (typeAsVariable.boundsCount() == 1) {
-						exprType = typeAsVariable.firstBound;
-					}
-				}
-				if (exprType instanceof ParameterizedTypeBinding) {
-					ParameterizedTypeBinding parameterizedTypeBinding = (ParameterizedTypeBinding) exprType;
-					if (CharOperation.equals(enum_case_base_tokens, parameterizedTypeBinding.compoundName)) {
-						if (parameterizedTypeBinding.arguments != null && parameterizedTypeBinding.arguments.length==1) {
-							if (parameterizedTypeBinding.arguments[0] instanceof CaptureBinding) {
-							     CaptureBinding binding = (CaptureBinding) parameterizedTypeBinding.arguments[0];
-							     if (binding.wildcard != null) {
-							    	 if (binding.wildcard.boundKind == Wildcard.SUPER) {
-							    		 visitorType = binding.wildcard.bound;
-							    	 }
-							     }
-							} else if (parameterizedTypeBinding.arguments[0] instanceof WildcardBinding) {
-								WildcardBinding binding = (WildcardBinding) parameterizedTypeBinding.arguments[0];
-						    	 if (binding.boundKind == Wildcard.SUPER) {
-						    		 visitorType = binding.bound;
-						    	 }
-							}
-						}
-					}
-				}
-				SwitchStatement switchSt = (SwitchStatement) this.statements[1];
-				
-				
 				if (visitorType == null) {
-				  switchSt.ohlTodoAnonymousAlloc.type = new SingleTypeReference("unknown_type".toCharArray(), 0);
+				  switchStatement.ohlTodoAnonymousAlloc.type = new SingleTypeReference("unknown_type".toCharArray(), 0);
 				} else {
-    				switchSt.ohlTodoAnonymousAlloc.type = binding2typeRef(visitorType, switchStatementExpressionPos);
+    				switchStatement.ohlTodoAnonymousAlloc.type = binding2typeRef(visitorType, switchStatementExpressionPos);
 				}
 
-				for (int i=0; i<switchSt.ohlCaseBlocks.length; i++) {
-					Block block = switchSt.ohlCaseBlocks[i];
+				for (int i=0; i<switchStatement.ohlCaseBlocks.length; i++) {
+					Block block = switchStatement.ohlCaseBlocks[i];
           
-					LocalDeclaration decl1 = (LocalDeclaration) block.statements[0];
+					LocalDeclaration decl1 = (LocalDeclaration) block.statements[OhlSupport.SwitchLayout.FIRST_DECLARATION_OFFSET];
           if (finalVarName != null && decl1.name == OhlSupport.NO_TAG_IDENTIFIER) {
             decl1.name = finalVarName;
             decl1.ohlRedefineForCast = true;
@@ -181,7 +168,7 @@ public void resolve(BlockScope upperScope) {
             decl1.name = "caseEnumTempVarNotUsed".toCharArray();
           }
           
-					switch (switchSt.ohlCaseStatements[i].ohlCaseType) {
+					switch (switchStatement.ohlCaseStatements[i].ohlCaseType) {
           case CaseStatement.OHL_TYPE_CASE: {
             
           } break;
@@ -248,8 +235,7 @@ public void resolve(BlockScope upperScope) {
 			}
 
 
-
-		for (int i = 0, length = this.statements.length; i < length; i++) {
+		for (int i = alreadyResolvedStatements, length = this.statements.length; i < length; i++) {
 			this.statements[i].resolve(this.scope);
 		}
 	}

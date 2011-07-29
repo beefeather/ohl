@@ -38,9 +38,17 @@ import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
+import org.eclipse.jdt.internal.compiler.lookup.CaptureBinding;
+import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
+import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
+import org.eclipse.jdt.internal.compiler.lookup.WildcardBinding;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 
 public class OhlSupport {
@@ -50,6 +58,7 @@ public class OhlSupport {
   public static final String VISITOR_TYPE_METHOD_PREFIX = "visit_type_";
   private static final String VISITOR_STRUCT_METHOD_PREFIX = "visit_struct_";
   public static final char [] NO_TAG_IDENTIFIER = "<ohl no tag>".toCharArray();
+	private static Statement switchStatement;
 
   static void transformEnumCaseDeclaration(TypeDeclaration enumDeclaration) {
     enumDeclaration.ohlIsEnumCase = true;
@@ -415,6 +424,14 @@ public class OhlSupport {
         = typeDeclaration.bodyEnd 
         = pos;
   }
+  
+  public interface SwitchLayout {
+  	int FIRST_DECLARATION_OFFSET = 0;
+  	int SECOND_DECLARATION_OFFSET = 1;
+		int SWITCH_STATEMENT_OFFSET = 2;
+		int LENGTH = 3;
+  	
+  }
 
   public static Block convertSwitchStatement(SwitchStatement switchStatement, CompilationResult compilationResult) {
     int ohlCount = 0;
@@ -453,11 +470,16 @@ public class OhlSupport {
     
     // TODO: make unique
     String synVarName = "switchExpressionCached";
-    Statement [] newSts = new Statement[2];
     LocalDeclaration declSt = new LocalDeclaration(synVarName.toCharArray(), 0, 0);
     declSt.initialization = switchStatement.expression;
     declSt.type = TypeReference.baseTypeReference(TypeIds.T_int, 0);
     declSt.ohlRedefineForCast = true; // No problem it is overloaded
+
+    String synVarName2 = "switchExpressionCached2";
+    LocalDeclaration declSt2 = new LocalDeclaration(synVarName2.toCharArray(), 0, 0);
+    declSt2.initialization = new SingleNameReference(synVarName.toCharArray(), 0);
+    declSt2.type = TypeReference.baseTypeReference(TypeIds.T_int, 0);
+    declSt2.ohlRedefineForCast = true; // No problem it is overloaded
     
     
     TypeDeclaration anonymousType = new TypeDeclaration(compilationResult);
@@ -524,7 +546,7 @@ public class OhlSupport {
           new ReturnStatement(new IntLiteral(Integer.toString(i+CASE_CODES_START).toCharArray(), 0, 0), 0, 0)
       };
       
-      caseSt.ohlTodoCastExpression.expression = new SingleNameReference(synVarName.toCharArray(), 0);
+      caseSt.ohlTodoCastExpression.expression = new SingleNameReference(synVarName2.toCharArray(), 0);
       caseSt.constantExpression = new IntLiteral(Integer.toString(i+CASE_CODES_START).toCharArray(), 0, 0);
       caseStatements[i] = caseSt;
       caseBlocks[i] = (Block) switchStatement.statements[caseStatePos[i] + 1];
@@ -562,14 +584,16 @@ public class OhlSupport {
     switchStatement.ohlHasExplicitDefault = hasExplicitDefault;
     
     MessageSend messageSend = new MessageSend();
-    messageSend.receiver = new SingleNameReference(synVarName.toCharArray(), 0);
+    messageSend.receiver = new SingleNameReference(synVarName2.toCharArray(), 0);
     messageSend.selector = "accept".toCharArray();
     messageSend.arguments = new Expression [] { alloc };
     
     switchStatement.expression = messageSend; 
 
-    newSts[0] = declSt;
-    newSts[1] = switchStatement;
+    Statement [] newSts = new Statement[SwitchLayout.LENGTH];
+    newSts[SwitchLayout.FIRST_DECLARATION_OFFSET] = declSt;
+    newSts[SwitchLayout.SECOND_DECLARATION_OFFSET] = declSt2;
+    newSts[SwitchLayout.SWITCH_STATEMENT_OFFSET] = switchStatement;
     
     Block block = new Block(2);
     block.ohlIsSynSwitchBlock = true;
@@ -847,5 +871,52 @@ public class OhlSupport {
 		}
 		
 		return true;
+	}
+	
+	public static TypeBinding getVisitorTypeFromEnumCase(TypeBinding exprType) {
+		if (exprType instanceof TypeVariableBinding) {
+			TypeVariableBinding typeAsVariable = (TypeVariableBinding) exprType;
+			if (typeAsVariable.boundsCount() == 1) {
+				exprType = typeAsVariable.firstBound;
+			}
+		}
+		if (exprType instanceof ParameterizedTypeBinding) {
+			ParameterizedTypeBinding parameterizedTypeBinding = (ParameterizedTypeBinding) exprType;
+			if (CharOperation.equals(ENUM_CASE_BASE_TOKENS, parameterizedTypeBinding.compoundName)) {
+				if (parameterizedTypeBinding.arguments != null && parameterizedTypeBinding.arguments.length==1) {
+					if (parameterizedTypeBinding.arguments[0] instanceof CaptureBinding) {
+					     CaptureBinding binding = (CaptureBinding) parameterizedTypeBinding.arguments[0];
+					     if (binding.wildcard != null) {
+					    	 if (binding.wildcard.boundKind == Wildcard.SUPER) {
+					    		 return binding.wildcard.bound;
+					    	 }
+					     }
+					} else if (parameterizedTypeBinding.arguments[0] instanceof WildcardBinding) {
+						WildcardBinding binding = (WildcardBinding) parameterizedTypeBinding.arguments[0];
+				    	 if (binding.boundKind == Wildcard.SUPER) {
+				    		 return binding.bound;
+				    	 }
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
+	public static boolean hasToEnumCaseMethod(TypeBinding exprType, BlockScope scope) {
+		if (exprType instanceof TypeVariableBinding) {
+			TypeVariableBinding typeAsVariable = (TypeVariableBinding) exprType;
+			if (typeAsVariable.boundsCount() == 1) {
+				exprType = typeAsVariable.firstBound;
+			}
+		}
+		
+		if (exprType instanceof ReferenceBinding == false) {
+			return false;
+		}
+		ReferenceBinding referenceBinding = (ReferenceBinding) exprType;
+		MethodBinding methodBinding = referenceBinding.getExactMethod(TO_ENUM_CASE_METHOD_NAME, new TypeBinding[0], scope.compilationUnitScope());
+		
+		return methodBinding != null && methodBinding.problemId() == 0;
 	}
 }
