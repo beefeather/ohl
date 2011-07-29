@@ -8,7 +8,7 @@ import ru.spb.rybin.ohl.v3.samples.expressionparser.ast.AstVariable;
 public class PerlExpressionGenerator {
   public static void generate(AstNode node, StringBuilder output) {
     output.append('(');
-    switch (node.getSubtype()) {
+    switch (node) {
       case instanceof AstBinaryOperation binary {
         generate(binary.getLeft(), output);
         switch (binary.getOperation()) {

@@ -46,10 +46,6 @@ public class Parser {
       public AstNode getRight() {
         return right;
       }         
-      @Override
-      public AstType.case getSubtype() {
-        return this;
-      }
       public Operation.case getOperation() {
         return operation;
       }
@@ -73,9 +69,6 @@ public class Parser {
           public int getValue() {
             return value;
           }
-          public AstType.case getSubtype() {
-            return this;
-          }
         };
       }
       case * identifier(final String name) {
@@ -83,9 +76,6 @@ public class Parser {
         return new AstVariable() {
           public String getName() {
             return name;
-          }
-          public AstType.case getSubtype() {
-            return this;
           }
         };
       }
